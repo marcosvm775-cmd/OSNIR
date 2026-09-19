@@ -27,7 +27,9 @@ import {
 } from 'lucide-react';
 import { Passenger, Driver, Trip, FinancialConfig, CompanyConfig } from '../types';
 import { getAllDataExport, DEFAULT_COMPANY_CONFIG } from '../utils/storage';
-import { KeyRound, ShieldCheck } from 'lucide-react';
+import { KeyRound, ShieldCheck, FolderArchive, Loader2 } from 'lucide-react';
+import JSZip from 'jszip';
+import projectFilesBundle from '../projectFilesBundle.json';
 
 interface SettingsManagerProps {
   passengers: Passenger[];
@@ -187,6 +189,43 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
     showFeedback('Configurações visuais restauradas para os padrões originais!');
   };
 
+  const [isGeneratingZip, setIsGeneratingZip] = useState(false);
+
+  const handleDownloadProjectZipDirectly = async () => {
+    try {
+      setIsGeneratingZip(true);
+      showFeedback('Gerando arquivo ZIP com todos os arquivos do instalador...');
+
+      const zip = new JSZip();
+      const filesMap = projectFilesBundle as Record<string, string>;
+
+      for (const [filePath, fileContent] of Object.entries(filesMap)) {
+        if (filePath.endsWith('.png')) {
+          zip.file(filePath, fileContent, { base64: true });
+        } else {
+          zip.file(filePath, fileContent);
+        }
+      }
+
+      const content = await zip.generateAsync({ type: 'blob' });
+      const url = URL.createObjectURL(content);
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.href = url;
+      downloadAnchor.download = 'OSNIR_TURISMO_SISTEMA_COMPLETO.zip';
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      URL.revokeObjectURL(url);
+
+      showFeedback('Arquivo ZIP baixado com sucesso direto no seu computador!');
+    } catch (error) {
+      console.error('Erro ao gerar ZIP local:', error);
+      showFeedback('Houve um problema ao gerar o ZIP. Tente novamente.');
+    } finally {
+      setIsGeneratingZip(false);
+    }
+  };
+
   const handleExportBackup = () => {
     try {
       const data = getAllDataExport();
@@ -292,6 +331,22 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
 
             <button
               type="button"
+              id="btn-download-project-zip-top"
+              onClick={handleDownloadProjectZipDirectly}
+              disabled={isGeneratingZip}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition active:scale-95 cursor-pointer disabled:opacity-50"
+              title="Baixar pacote ZIP completo com arquivos e o gerador de instalador .exe"
+            >
+              {isGeneratingZip ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <FolderArchive className="w-3.5 h-3.5 text-white" />
+              )}
+              <span>{isGeneratingZip ? 'Gerando ZIP...' : 'Baixar ZIP do Projeto'}</span>
+            </button>
+
+            <button
+              type="button"
               id="btn-export-backup-top"
               onClick={handleExportBackup}
               className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-xl shadow-xs transition active:scale-95 cursor-pointer"
@@ -325,6 +380,22 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+            <button
+              type="button"
+              id="btn-download-installer-bundle-card"
+              onClick={handleDownloadProjectZipDirectly}
+              disabled={isGeneratingZip}
+              className="py-2.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black text-xs transition shadow-sm flex items-center space-x-2 cursor-pointer disabled:opacity-50"
+              title="Baixar ZIP completo do projeto para gerar o instalador"
+            >
+              {isGeneratingZip ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <FolderArchive className="w-4 h-4" />
+              )}
+              <span>{isGeneratingZip ? 'Preparando...' : 'Baixar ZIP para Instalador'}</span>
+            </button>
+
             {onOpenLicenseModal && (
               <button
                 type="button"
