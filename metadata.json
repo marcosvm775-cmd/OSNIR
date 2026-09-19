@@ -1,0 +1,8 @@
+{
+  "name": "OSNIR TURISMO",
+  "description": "Sistema de Gestão de Passageiros, Viagens, Despesas e Fechamento Comercial para Empresas de Transporte com instalador desktop (.exe) e licença para até 3 computadores.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#065f46"/>
+      <stop offset="100%" stop-color="#022c22"/>
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+
+  <!-- Background Rounded Shield -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)"/>
+  <rect x="12" y="12" width="488" height="488" rx="100" fill="none" stroke="#34d399" stroke-width="6" stroke-opacity="0.3"/>
+
+  <!-- Golden Accent Trim -->
+  <path d="M 64 380 L 448 380" stroke="url(#goldGrad)" stroke-width="12" stroke-linecap="round"/>
+
+  <!-- Bus Silhouette & Windshield -->
+  <g filter="url(#shadow)">
+    <!-- Main Bus Body -->
+    <rect x="116" y="120" width="280" height="230" rx="36" fill="#ffffff"/>
+    
+    <!-- Windshield Upper & Lower -->
+    <path d="M 136 150 C 136 140 144 135 154 135 L 358 135 C 368 135 376 140 376 150 L 376 210 L 136 210 Z" fill="#0f172a"/>
+    <line x1="256" y1="135" x2="256" y2="210" stroke="#334155" stroke-width="4"/>
+    
+    <!-- Destination Sign / Header Display -->
+    <rect x="180" y="145" width="152" height="24" rx="6" fill="#fbbf24"/>
+    <text x="256" y="162" font-family="sans-serif" font-weight="900" font-size="13" fill="#000" text-anchor="middle" letter-spacing="2">OSNIR TURISMO</text>
+
+    <!-- Lower Grille & Lights -->
+    <rect x="136" y="235" width="240" height="75" rx="16" fill="#f8fafc"/>
+    
+    <!-- Headlights -->
+    <circle cx="166" cy="275" r="16" fill="#fbbf24" stroke="#d97706" stroke-width="3"/>
+    <circle cx="346" cy="275" r="16" fill="#fbbf24" stroke="#d97706" stroke-width="3"/>
+    <circle cx="166" cy="275" r="8" fill="#ffffff"/>
+    <circle cx="346" cy="275" r="8" fill="#ffffff"/>
+
+    <!-- Grille Bars -->
+    <rect x="206" y="260" width="100" height="8" rx="4" fill="#065f46"/>
+    <rect x="216" y="276" width="80" height="8" rx="4" fill="#065f46"/>
+
+    <!-- Wheels / Tires -->
+    <rect x="136" y="340" width="48" height="26" rx="8" fill="#0f172a"/>
+    <rect x="328" y="340" width="48" height="26" rx="8" fill="#0f172a"/>
+
+    <!-- Side Mirrors -->
+    <rect x="96" y="160" width="16" height="40" rx="6" fill="#0f172a"/>
+    <rect x="400" y="160" width="16" height="40" rx="6" fill="#0f172a"/>
+  </g>
+
+  <!-- App Name Bottom Banner -->
+  <text x="256" y="440" font-family="sans-serif" font-weight="900" font-size="28" fill="#ffffff" text-anchor="middle" letter-spacing="3">SISTEMA DE VIAGENS</text>
+  <text x="256" y="468" font-family="sans-serif" font-weight="700" font-size="16" fill="#34d399" text-anchor="middle" letter-spacing="2">CONTROLE COMERCIAL &amp; FROTAS</text>
+</svg>

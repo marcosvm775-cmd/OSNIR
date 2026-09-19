@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+@layer base {
+  html {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    text-transform: uppercase !important;
+  }
+
+  body {
+    overscroll-behavior-y: none;
+    text-transform: uppercase !important;
+  }
+
+  *, *::before, *::after {
+    text-transform: uppercase !important;
+  }
+
+  input, select, textarea, button {
+    text-transform: uppercase !important;
+  }
+
+  input::placeholder, textarea::placeholder {
+    text-transform: uppercase !important;
+  }
+}
+
