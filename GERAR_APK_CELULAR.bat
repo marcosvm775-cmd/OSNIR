@@ -64,7 +64,7 @@ if defined LOCAL_SDK (
     set "ANDROID_HOME=!LOCAL_SDK!"
     set "ANDROID_SDK_ROOT=!LOCAL_SDK!"
     
-    :: Criar local.properties com barras normais (o padrao mais confiavel do Java/Gradle)
+    :: Criar local.properties com barras normais
     set "FORMATO_SDK=!LOCAL_SDK:\=/!"
     echo sdk.dir=!FORMATO_SDK!> "%~dp0android\local.properties"
     
@@ -76,11 +76,11 @@ if defined LOCAL_SDK (
 )
 
 echo.
-echo 3. Compilando o APK agora mesmo...
+echo 3. Compilando o APK com diagnostico detalhado...
 echo.
 
 cd /d "%~dp0android"
-call gradlew.bat assembleDebug
+call gradlew.bat assembleDebug --info
 cd /d "%~dp0"
 
 echo.
@@ -104,12 +104,10 @@ if exist "%~dp0android\app\build\outputs\apk\debug\app-debug.apk" (
     start "" explorer "%DESTINO%"
 ) else (
     echo ===============================================================================
-    echo                            MENSAGEM DO SISTEMA
+    echo               ATENCAO: COPIE A MENSAGEM DO ERRO ACIMA
     echo ===============================================================================
     echo.
-    echo Veja as linhas logo acima deste aviso.
-    echo Me diga exatamente o que esta escrito no texto que comeca com:
-    echo "* What went wrong:"
+    echo Olhe as linhas acima deste aviso. Copie as ultimas linhas para sabermos o motivo exato.
     echo.
 )
 

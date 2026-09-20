@@ -12,58 +12,48 @@ echo.
 echo Este utilitario cria o instalador executavel oficial (.exe) para o seu PC
 echo ou para distribuir e vender aos seus clientes!
 echo.
-echo ===============================================================================
-echo 1. Verificando o ambiente Node.js...
-echo ===============================================================================
 
-where node >nul 2>&1
+:: 1. Verificar se a pasta dist existe
+echo 1. Verificando os arquivos do sistema...
+if not exist "%~dp0dist\index.html" (
+    echo [INFO] Compilando arquivos com o Vite...
+    if exist "%~dp0node_modules\.bin\vite.cmd" (
+        call "%~dp0node_modules\.bin\vite.cmd" build
+    ) else (
+        call npx --yes vite build
+    )
+) else (
+    echo [OK] Arquivos compilados do sistema ja estao prontos na pasta dist!
+)
+
+echo.
+echo 2. Empacotando o instalador executavel (.exe) para Windows...
+echo    Aguarde cerca de 1 a 2 minutos...
+echo.
+
+set "BUILDER_CMD="
+if exist "%~dp0node_modules\.bin\electron-builder.cmd" (
+    set "BUILDER_CMD=%~dp0node_modules\.bin\electron-builder.cmd"
+) else (
+    set "BUILDER_CMD=npx --yes electron-builder"
+)
+
+call %BUILDER_CMD% --win nsis
+
 if %errorlevel% neq 0 (
     color 0C
-    echo [ALERTA] O Node.js nao foi detectado no PATH do Windows.
-    echo Baixe e instale o Node.js LTS em: https://nodejs.org
     echo.
-    pause
-    exit /b 1
-)
-
-for /f "tokens=*" %%v in ('node -v') do set "NODE_VER=%%v"
-echo [OK] Node.js detectado: %NODE_VER%
-echo.
-
-echo ===============================================================================
-echo 2. Compilando os arquivos mais recentes do sistema (Vite)...
-echo ===============================================================================
-call npx vite build
-if %errorlevel% neq 0 (
-    color 0C
-    echo [ERRO] Falha ao compilar o sistema com o Vite.
-    pause
-    exit /b 1
-)
-echo [OK] Sistema compilado com sucesso na pasta dist!
-echo.
-
-echo ===============================================================================
-echo 3. Gerando o instalador executavel (.exe) profissional para Windows...
-echo    Aguarde cerca de 1 a 2 minutos enquanto o Electron empacota o instalador...
-echo ===============================================================================
-call npx electron-builder --win nsis
-if %errorlevel% neq 0 (
-    color 0C
-    echo [ERRO] Falha ao empacotar com o electron-builder.
+    echo [ERRO] Ocorreu uma falha ao empacotar com o Electron Builder.
+    echo Verifique a mensagem acima na tela.
     pause
     exit /b 1
 )
 
 echo.
-echo ===============================================================================
-echo 4. Organizando o instalador final...
-echo ===============================================================================
-
+echo 3. Organizando o instalador final...
 set "PASTA_FINAL=%~dp0INSTALADOR_FINAL_PARA_O_CLIENTE"
 if not exist "%PASTA_FINAL%" mkdir "%PASTA_FINAL%"
 
-:: Copiar o instalador .exe gerado para a pasta limpa final
 set "ACHOU_EXE=0"
 for %%f in ("%~dp0dist-electron\*.exe") do (
     copy /y "%%f" "%PASTA_FINAL%\" >nul 2>&1
@@ -90,7 +80,6 @@ echo.
 echo [x] Instalador standalone profissional com Assistente de Instalacao Windows (NSIS)
 echo [x] Cria icone na Area de Trabalho e no Menu Iniciar automaticamente
 echo [x] Banco de dados embutido offline
-echo [x] Pronto para uso proprio ou para venda!
 echo.
 echo Abrindo a pasta do instalador agora mesmo na sua tela...
 start "" explorer "%PASTA_FINAL%"
