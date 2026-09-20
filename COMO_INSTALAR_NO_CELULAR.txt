@@ -1,0 +1,43 @@
+===============================================================================
+       OSNIR TURISMO - COMO COLOCAR O APLICATIVO NO CELULAR DO CLIENTE
+===============================================================================
+
+1. POR QUE O LINK DO WHATSAPP NAO ABRIU NO CELULAR?
+-------------------------------------------------------------------------------
+O link de teste (ais-pre-...) e um link PRIVADO de seguranca do Google AI Studio.
+Ele so abre no navegador do computador onde a sua conta do Google esta conectada!
+Por isso, quando voce ou o cliente clica no celular, o Google bloqueia o acesso
+por seguranca.
+
+
+2. COMO RESOLVER ISSO E COLOCAR NO CELULAR DO CLIENTE:
+-------------------------------------------------------------------------------
+
+OPCAO A: GERAR O ARQUIVO .APK DIRETO COM O ANDROID STUDIO
+---------------------------------------------------------
+Ja criamos a pasta "android" 100% pronta dentro deste projeto!
+Se voce ou algum amigo tecnico tiver o programa gratuito ANDROID STUDIO no PC:
+1. Abra o Android Studio.
+2. Clique em "Open" e escolha a pasta "android" deste projeto.
+3. No menu superior, clique em: Build -> Build Bundle(s) / APK(s) -> Build APK(s).
+4. O arquivo .apk fica pronto na mesma hora, 100% offline, para voce enviar ao cliente!
+
+
+OPCAO B: PUBLICAR UM LINK GRATUITO QUE ABRE NO WHATSAPP DE QUALQUER CELULAR
+---------------------------------------------------------------------------
+Para que qualquer pessoa possa abrir no celular pelo WhatsApp em 3 segundos:
+1. A pasta "dist" deste projeto ja contem todo o sistema compilado.
+2. Acesse no navegador o site gratuito: https://app.netlify.com/drop
+3. Arraste a pasta "dist" para dentro da tela do site.
+4. Em 5 segundos ele gera um link publico (exemplo: osnir-turismo.netlify.app).
+5. Envie esse link no WhatsApp do cliente. Ele abre na hora no celular e mostra
+   o botao "Instalar Aplicativo OSNIR TURISMO" na tela inicial do celular!
+
+
+OPCAO C: NO COMPUTADOR DO CLIENTE (100% OFFLINE SEM PRECISAR DE NADA)
+----------------------------------------------------------------------
+Se o cliente for usar no computador ou notebook:
+1. Envie a pasta para ele.
+2. Ele so da 2 cliques no arquivo: ABRIR_SISTEMA_OFFLINE.bat
+3. O sistema abre na hora em tela cheia, como aplicativo nativo, sem internet!
+===============================================================================

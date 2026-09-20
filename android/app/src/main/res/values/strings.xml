@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">OSNIR TURISMO</string>
+    <string name="title_activity_main">OSNIR TURISMO</string>
+    <string name="package_name">com.osnirturismo.app</string>
+    <string name="custom_url_scheme">com.osnirturismo.app</string>
+</resources>

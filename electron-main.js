@@ -14,7 +14,7 @@ function createWindow() {
     minWidth: 1024,
     minHeight: 700,
     title: 'OSNIR TURISMO - Sistema de Gestão',
-    icon: path.join(__dirname, 'public', 'app-icon.png'),
+    icon: path.join(__dirname, 'dist', 'app-icon.png'),
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,

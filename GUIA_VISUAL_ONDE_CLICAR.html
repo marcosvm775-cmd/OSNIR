@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OSNIR TURISMO - Onde encontrar as opções no Android Studio</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { background: #0f172a; color: #f8fafc; padding: 24px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+    .card { background: #1e293b; border-radius: 16px; border: 1px solid #334155; max-width: 800px; width: 100%; padding: 32px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+    h1 { font-size: 24px; color: #38bdf8; margin-bottom: 8px; text-align: center; }
+    p.lead { color: #94a3b8; font-size: 15px; text-align: center; margin-bottom: 28px; }
+    
+    .scenario { background: #0f172a; border-radius: 12px; border: 1px solid #334155; padding: 20px; margin-bottom: 20px; }
+    .scenario-title { font-size: 17px; font-weight: bold; color: #f59e0b; display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+    .scenario-title.green { color: #4ade80; }
+    .scenario-title.blue { color: #60a5fa; }
+    .desc { color: #cbd5e1; font-size: 14px; line-height: 1.7; margin-bottom: 12px; }
+    
+    .btn-action { display: inline-block; background: #2563eb; color: white; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 13px; text-decoration: none; margin: 4px 0; }
+    .box-code { background: #1e293b; border: 1px dashed #475569; padding: 10px 14px; border-radius: 8px; color: #38bdf8; font-family: monospace; font-size: 14px; margin: 8px 0; font-weight: bold; }
+    .badge { background: #ef4444; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🔍 Por que está estranho e onde estão as opções?</h1>
+    <p class="lead">Veja em qual dessas 4 situações a sua tela do Android Studio se encaixa:</p>
+
+    <!-- Situacao 1: Tela de Boas-Vindas -->
+    <div class="scenario">
+      <div class="scenario-title">
+        <span>1️⃣ Sua tela é cinza e diz "Welcome to Android Studio"?</span>
+      </div>
+      <div class="desc">
+        Nessa tela inicial <strong>NÃO EXISTE o menu "Build"</strong> ainda! Isso é normal!<br>
+        Você precisa abrir a pasta do projeto primeiro:
+        <br><br>
+        👉 Clique no botão <strong>"Open"</strong> (ícone de pasta).<br>
+        👉 Navegue até a pasta do seu projeto e selecione <strong>apenas a pasta chamada "android"</strong> (ela tem o ícone de um robozinho verde).<br>
+        👉 Clique em <strong>OK</strong>.
+      </div>
+    </div>
+
+    <!-- Situacao 2: Nova Interface (Menu Hambúrguer) -->
+    <div class="scenario">
+      <div class="scenario-title blue">
+        <span>2️⃣ O Android Studio escondeu a barra de menus no botão [ ☰ ]</span>
+      </div>
+      <div class="desc">
+        Nas versões novas do Android Studio, a palavra <em>Build</em> fica escondida dentro de um botão de <strong>3 risquinhos horizontais (☰)</strong> lá no cantinho superior esquerdo da janela!<br><br>
+        👉 Olhe bem no cantinho superior esquerdo da tela do Android Studio.<br>
+        👉 Clique no ícone de <strong>3 risquinhos ☰</strong>.<br>
+        👉 O menu vai se abrir! Aí sim você verá: <strong>Build ➔ Build Bundle(s) / APK(s) ➔ Build APK(s)</strong>.
+      </div>
+    </div>
+
+    <!-- Situacao 3: Abriu a pasta errada -->
+    <div class="scenario">
+      <div class="scenario-title">
+        <span>3️⃣ A palavra "Build APK" não aparece dentro de Build?</span>
+      </div>
+      <div class="desc">
+        Se você abriu a pasta mãe <code>osnir-turismo</code>, o Android Studio não sabe que é um aplicativo Android.<br>
+        <strong>Como corrigir:</strong><br>
+        👉 No Android Studio, vá em <strong>File ➔ Open</strong>.<br>
+        👉 Escolha <strong>diretamente a subpasta "android"</strong> (ex: <code>C:\...\osnir-turismo\android</code>).<br>
+        👉 Ele vai reconhecer na hora como aplicativo móvel!
+      </div>
+    </div>
+
+    <!-- Situacao 4: Carregando no rodapé -->
+    <div class="scenario">
+      <div class="scenario-title green">
+        <span>4️⃣ Tem uma barra azul ou texto se mexendo lá embaixo?</span>
+      </div>
+      <div class="desc">
+        No rodapé (na parte de baixo da tela), pode estar escrito <strong>"Gradle: Syncing..."</strong> ou <strong>"Indexing..."</strong>.<br>
+        Enquanto essa barrinha estiver trabalhando, o Android Studio bloqueia o menu Build.<br>
+        👉 Basta esperar 1 a 2 minutos até a barra sumir e aparecer a mensagem verde <em>"Sync successful"</em>.
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>
