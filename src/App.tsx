@@ -32,6 +32,7 @@ import { TripClosingManager } from './components/TripClosingManager';
 import { SettingsManager } from './components/SettingsManager';
 import { LicenseModal } from './components/LicenseModal';
 import { DatabaseStatusModal } from './components/DatabaseStatusModal';
+import { OfflineIndicator } from './components/OfflineIndicator';
 import { initializeLocalDatabase } from './utils/database';
 import { isProductActivated } from './utils/license';
 import { generateGeneralPassengersListPdf } from './utils/pdfGenerator';
@@ -82,8 +83,14 @@ export default function App() {
 
   // License & Database Modal States
   const [isLicenseModalOpen, setIsLicenseModalOpen] = useState(false);
+  const [isLicenseModalDirectToGenerator, setIsLicenseModalDirectToGenerator] = useState(false);
   const [isDatabaseModalOpen, setIsDatabaseModalOpen] = useState(false);
   const [isLicenseActive, setIsLicenseActive] = useState<boolean>(() => isProductActivated());
+
+  const handleOpenLicenseModal = (directToGenerator: boolean = false) => {
+    setIsLicenseModalDirectToGenerator(directToGenerator);
+    setIsLicenseModalOpen(true);
+  };
 
   // Function to reload state from storage (used on database restore)
   const reloadAllData = () => {
@@ -478,8 +485,9 @@ export default function App() {
         onOpenDriverModal={() => setIsDriverModalOpen(true)}
         onResetData={() => setActiveTab('settings')}
         companyConfig={companyConfig}
-        onOpenLicenseModal={() => setIsLicenseModalOpen(true)}
+        onOpenLicenseModal={() => handleOpenLicenseModal(false)}
         onOpenDatabaseModal={() => setIsDatabaseModalOpen(true)}
+        onOpenKeyGenerator={() => handleOpenLicenseModal(true)}
         isLicenseActive={isLicenseActive}
       />
 
@@ -952,6 +960,7 @@ export default function App() {
         isOpen={isLicenseModalOpen}
         onClose={() => setIsLicenseModalOpen(false)}
         onLicenseUpdated={(lic) => setIsLicenseActive(!!lic)}
+        initialShowGenerator={isLicenseModalDirectToGenerator}
       />
 
       {/* Local Database Initialization & Health Modal */}
@@ -960,6 +969,9 @@ export default function App() {
         onClose={() => setIsDatabaseModalOpen(false)}
         onDataRestored={reloadAllData}
       />
+
+      {/* Offline Connectivity & Storage Banner */}
+      <OfflineIndicator />
 
       {/* Bottom Navigation with 6 tabs */}
       <BottomNav

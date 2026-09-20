@@ -30,12 +30,14 @@ interface LicenseModalProps {
   isOpen: boolean;
   onClose: () => void;
   onLicenseUpdated?: (license: ProductLicense | null) => void;
+  initialShowGenerator?: boolean;
 }
 
 export const LicenseModal: React.FC<LicenseModalProps> = ({
   isOpen,
   onClose,
   onLicenseUpdated,
+  initialShowGenerator = false,
 }) => {
   const [activeLicense, setActiveLicense] = useState<ProductLicense | null>(null);
   const [machineId, setMachineId] = useState<string>('');
@@ -58,13 +60,14 @@ export const LicenseModal: React.FC<LicenseModalProps> = ({
       setMachineId(hwid);
       setErrorMessage('');
       setSuccessMessage('');
+      setShowAdminGenerator(initialShowGenerator);
       if (lic) {
         setClientName(lic.licenseeName);
         setInputKey(lic.productKey);
         setSlotNumber(lic.currentSlot);
       }
     }
-  }, [isOpen]);
+  }, [isOpen, initialShowGenerator]);
 
   if (!isOpen) return null;
 

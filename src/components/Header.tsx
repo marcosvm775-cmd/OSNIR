@@ -17,6 +17,7 @@ import {
   KeyRound,
 } from 'lucide-react';
 import { ActiveTab, CompanyConfig } from '../types';
+import { PWAInstallButton } from './PWAInstallButton';
 
 interface HeaderProps {
   passengerCount: number;
@@ -31,6 +32,7 @@ interface HeaderProps {
   companyConfig?: CompanyConfig;
   onOpenLicenseModal?: () => void;
   onOpenDatabaseModal?: () => void;
+  onOpenKeyGenerator?: () => void;
   isLicenseActive?: boolean;
 }
 
@@ -46,6 +48,7 @@ export const Header: React.FC<HeaderProps> = ({
   companyConfig,
   onOpenLicenseModal,
   onOpenDatabaseModal,
+  onOpenKeyGenerator,
   isLicenseActive = false,
 }) => {
   const currentPrimaryColor = companyConfig?.primaryColor || '#065f46';
@@ -96,6 +99,9 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Right Action buttons */}
           <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
+            {/* Botão Instalar App no Celular / PWA */}
+            <PWAInstallButton variant="header" />
+
             {/* Botão Banco de Dados */}
             {onOpenDatabaseModal && (
               <button
@@ -106,6 +112,19 @@ export const Header: React.FC<HeaderProps> = ({
               >
                 <Database className="w-3.5 h-3.5 text-blue-300" />
                 <span className="hidden lg:inline text-[11px]">Banco</span>
+              </button>
+            )}
+
+            {/* Botão Gerador de Chaves (Acesso Direto e Rápido) */}
+            {onOpenKeyGenerator && (
+              <button
+                id="header-key-generator-btn"
+                onClick={onOpenKeyGenerator}
+                className="inline-flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 sm:py-2 bg-amber-400 hover:bg-amber-300 active:scale-95 text-xs font-black rounded-xl shadow-xs transition text-slate-950 cursor-pointer border border-amber-300"
+                title="Gerador de Chaves Válidas do Sistema (Painel do Proprietário)"
+              >
+                <KeyRound className="w-3.5 h-3.5 text-slate-900" />
+                <span className="hidden sm:inline text-[11px] font-black">Gerador de Chaves</span>
               </button>
             )}
 

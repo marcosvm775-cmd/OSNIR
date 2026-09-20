@@ -24,12 +24,14 @@ import {
   FileText,
   Save,
   Eye,
+  KeyRound,
+  ShieldCheck,
+  Smartphone,
 } from 'lucide-react';
 import { Passenger, Driver, Trip, FinancialConfig, CompanyConfig } from '../types';
 import { getAllDataExport, DEFAULT_COMPANY_CONFIG } from '../utils/storage';
-import { KeyRound, ShieldCheck, FolderArchive, Loader2 } from 'lucide-react';
-import JSZip from 'jszip';
-import projectFilesBundle from '../projectFilesBundle.json';
+import { AdminLicenseGenerator } from './AdminLicenseGenerator';
+import { PWAInstallButton } from './PWAInstallButton';
 
 interface SettingsManagerProps {
   passengers: Passenger[];
@@ -189,43 +191,6 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
     showFeedback('Configurações visuais restauradas para os padrões originais!');
   };
 
-  const [isGeneratingZip, setIsGeneratingZip] = useState(false);
-
-  const handleDownloadProjectZipDirectly = async () => {
-    try {
-      setIsGeneratingZip(true);
-      showFeedback('Gerando arquivo ZIP com todos os arquivos do instalador...');
-
-      const zip = new JSZip();
-      const filesMap = projectFilesBundle as Record<string, string>;
-
-      for (const [filePath, fileContent] of Object.entries(filesMap)) {
-        if (filePath.endsWith('.png')) {
-          zip.file(filePath, fileContent, { base64: true });
-        } else {
-          zip.file(filePath, fileContent);
-        }
-      }
-
-      const content = await zip.generateAsync({ type: 'blob' });
-      const url = URL.createObjectURL(content);
-      const downloadAnchor = document.createElement('a');
-      downloadAnchor.href = url;
-      downloadAnchor.download = 'OSNIR_TURISMO_SISTEMA_COMPLETO.zip';
-      document.body.appendChild(downloadAnchor);
-      downloadAnchor.click();
-      downloadAnchor.remove();
-      URL.revokeObjectURL(url);
-
-      showFeedback('Arquivo ZIP baixado com sucesso direto no seu computador!');
-    } catch (error) {
-      console.error('Erro ao gerar ZIP local:', error);
-      showFeedback('Houve um problema ao gerar o ZIP. Tente novamente.');
-    } finally {
-      setIsGeneratingZip(false);
-    }
-  };
-
   const handleExportBackup = () => {
     try {
       const data = getAllDataExport();
@@ -322,28 +287,12 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
                 id="btn-settings-license"
                 onClick={onOpenLicenseModal}
                 className="inline-flex items-center gap-1.5 px-3 py-2 bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-bold rounded-xl border border-amber-300 transition active:scale-95 cursor-pointer"
-                title="Gerenciar Chave de Produto e Instalações"
+                title="Ativar ou Gerenciar Chave de Produto (Até 3 PCs)"
               >
                 <KeyRound className="w-3.5 h-3.5 text-amber-600" />
-                <span>Chave do Produto (3 PCs)</span>
+                <span>Ativação & Licença (3 PCs)</span>
               </button>
             )}
-
-            <button
-              type="button"
-              id="btn-download-project-zip-top"
-              onClick={handleDownloadProjectZipDirectly}
-              disabled={isGeneratingZip}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition active:scale-95 cursor-pointer disabled:opacity-50"
-              title="Baixar pacote ZIP completo com arquivos e o gerador de instalador .exe"
-            >
-              {isGeneratingZip ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              ) : (
-                <FolderArchive className="w-3.5 h-3.5 text-white" />
-              )}
-              <span>{isGeneratingZip ? 'Gerando ZIP...' : 'Baixar ZIP do Projeto'}</span>
-            </button>
 
             <button
               type="button"
@@ -359,66 +308,54 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
         </div>
       </div>
 
-      {/* CARD DESTAQUE: SOFTWARE INSTALADOR DESKTOP & LICENCIAMENTO */}
-      <div className="bg-gradient-to-br from-slate-900 via-slate-850 to-slate-900 text-white rounded-2xl p-5 border border-slate-700 shadow-md">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center space-x-2">
-              <span className="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 text-[10px] font-extrabold uppercase tracking-wider border border-amber-500/30">
-                Software Instalador Desktop Windows (.exe / .msi)
-              </span>
-              <span className="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 text-[10px] font-extrabold uppercase tracking-wider border border-emerald-500/30">
-                1 Chave = Até 3 Computadores
-              </span>
+      {/* SEÇÃO ESPECIAL DO ADMINISTRADOR / VENDEDOR: GERADOR DE CHAVES OFICIAIS */}
+      <div className="bg-slate-900 text-white rounded-2xl border border-slate-700 shadow-md p-5 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/30 shrink-0">
+              <KeyRound className="w-5 h-5" />
             </div>
-            <h3 className="text-base sm:text-lg font-bold text-white">
-              Pronto para Venda Comercial e Instalação em Agências
-            </h3>
-            <p className="text-xs text-slate-300 max-w-2xl leading-relaxed">
-              O sistema foi configurado com <strong>Tauri</strong> para gerar um instalador clássico ultra leve (5 a 10 MB). Na primeira execução na máquina do cliente, o <strong>banco de dados local é criado e inicializado automaticamente</strong>, e a ativação garante o limite de 3 computadores por chave.
-            </p>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-extrabold text-white">
+                  Gerador de Chaves de Ativação do Sistema
+                </h3>
+                <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-extrabold uppercase tracking-wider border border-amber-500/30">
+                  Painel do Proprietário
+                </span>
+              </div>
+              <p className="text-xs text-slate-300">
+                Gere chaves oficiais autênticas para ativar e vender o software para seus clientes (cada chave autoriza até 3 computadores).
+              </p>
+            </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
-            <button
-              type="button"
-              id="btn-download-installer-bundle-card"
-              onClick={handleDownloadProjectZipDirectly}
-              disabled={isGeneratingZip}
-              className="py-2.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black text-xs transition shadow-sm flex items-center space-x-2 cursor-pointer disabled:opacity-50"
-              title="Baixar ZIP completo do projeto para gerar o instalador"
-            >
-              {isGeneratingZip ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <FolderArchive className="w-4 h-4" />
-              )}
-              <span>{isGeneratingZip ? 'Preparando...' : 'Baixar ZIP para Instalador'}</span>
-            </button>
-
+          <div className="flex items-center gap-2 shrink-0">
             {onOpenLicenseModal && (
               <button
                 type="button"
                 onClick={onOpenLicenseModal}
-                className="py-2.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-xs transition shadow-sm flex items-center space-x-2 cursor-pointer"
+                className="py-2 px-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs transition shadow-sm flex items-center space-x-1.5 cursor-pointer"
               >
-                <KeyRound className="w-4 h-4" />
-                <span>Gerenciar Licença & Gerar Chaves</span>
+                <ShieldCheck className="w-4 h-4" />
+                <span>Ver Status da Licença</span>
               </button>
             )}
-
             {onOpenDatabaseModal && (
               <button
                 type="button"
                 onClick={onOpenDatabaseModal}
-                className="py-2.5 px-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs transition border border-slate-600 flex items-center space-x-2 cursor-pointer"
+                className="py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs transition border border-slate-600 flex items-center space-x-1.5 cursor-pointer"
               >
                 <Database className="w-4 h-4 text-blue-400" />
-                <span>Status do Banco</span>
+                <span>Banco Local</span>
               </button>
             )}
           </div>
         </div>
+
+        {/* Gerador de Chaves Embutido Diretamente na Tela */}
+        <AdminLicenseGenerator />
       </div>
 
       {/* SEÇÃO 1: CADASTRO DA EMPRESA, LOGOMARCA E CORES */}
@@ -920,6 +857,57 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
               <div className="text-[11px] text-slate-400 mt-0.5">
                 Datas com escalas
               </div>
+            </div>
+          </div>
+
+          {/* VERSÃO PARA CELULAR (ANDROID & IPHONE) - BANCO 100% OFFLINE */}
+          <div className="bg-gradient-to-r from-emerald-900 to-slate-900 rounded-2xl border-2 border-emerald-500/40 p-5 text-white shadow-md space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center space-x-3">
+                <div className="w-11 h-11 rounded-xl bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 flex items-center justify-center shrink-0">
+                  <Smartphone className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm sm:text-base font-black text-white">
+                      Versão para Celular (Android & iOS)
+                    </h3>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500 text-slate-950 uppercase tracking-wider">
+                      100% Offline
+                    </span>
+                  </div>
+                  <p className="text-xs text-emerald-200/90 mt-0.5">
+                    Banco de dados gravado diretamente na memória interna do seu smartphone, sem necessidade de sinal de internet.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+              <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                <p className="font-bold text-emerald-300 mb-1">📱 Celular Android (Chrome)</p>
+                <p className="text-slate-300 text-[11px] leading-relaxed">
+                  Abra no Chrome, toque nos 3 pontinhos e selecione <strong>"Instalar Aplicativo"</strong>. O app ganha ícone próprio na sua tela inicial.
+                </p>
+              </div>
+
+              <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                <p className="font-bold text-emerald-300 mb-1">🍏 iPhone / iPad (Safari)</p>
+                <p className="text-slate-300 text-[11px] leading-relaxed">
+                  Abra no Safari, toque em <strong>Compartilhar</strong> e selecione <strong>"Adicionar à Tela de Início"</strong> para usar como app nativo.
+                </p>
+              </div>
+
+              <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                <p className="font-bold text-emerald-300 mb-1">💾 Memória do Aparelho</p>
+                <p className="text-slate-300 text-[11px] leading-relaxed">
+                  Todos os passageiros, motoristas, viagens e PDFs ficam guardados no próprio celular. Funciona no meio da estrada e em áreas rurais.
+                </p>
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-white/10">
+              <PWAInstallButton variant="card" />
             </div>
           </div>
 

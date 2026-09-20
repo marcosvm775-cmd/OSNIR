@@ -1,7 +1,7 @@
-# 📦 GUIA DE GERAÇÃO DO INSTALADOR WINDOWS (.EXE / .MSI) & LICENCIAMENTO
+# 📦 GUIA DE GERAÇÃO DO INSTALADOR WINDOWS (.EXE) & LICENCIAMENTO
 ### Sistema OSNIR TURISMO - Transporte e Viagens
 
-Este documento explica como gerar o instalador executável `.exe` para vender como software tradicional de computador para agências e empresas de transporte rodoviário.
+Este documento explica como gerar o instalador executável `.exe` leve (~75MB a 85MB) para vender como software tradicional de computador para agências e empresas de transporte rodoviário.
 
 ---
 
@@ -9,27 +9,31 @@ Este documento explica como gerar o instalador executável `.exe` para vender co
 
 ### Pré-requisitos na sua máquina de desenvolvimento (Windows):
 1. **Node.js** (v18 ou superior): https://nodejs.org
-2. **Compilador Rust para Windows** (gratuito e oficial):
-   * Acesse https://rustup.rs e baixe o `rustup-init.exe`.
-   * Execute e aperte a opção `1` (Instalação padrão).
 
 ### Passo a Passo para Gerar:
 1. Abra a pasta do projeto no Windows.
 2. Dê um duplo clique no arquivo:
    ```cmd
-   CRIAR_INSTALADOR_WINDOWS.bat
+   GERAR_INSTALADOR_FACIL.bat
    ```
-   *Ou execute pelo terminal:*
-   ```bash
-   npm run tauri:build
+3. O instalador final `.exe` será criado e colocado automaticamente na pasta:
    ```
-3. O instalador final `.exe` e `.msi` será criado automaticamente na pasta:
-   ```
-   src-tauri\target\release\bundle\nsis\OSNIR TURISMO_2.5.0_x64-setup.exe
-   src-tauri\target\release\bundle\msi\OSNIR TURISMO_2.5.0_x64_pt-BR.msi
+   INSTALADOR_FINAL_PARA_O_CLIENTE\OSNIR TURISMO Setup 2.5.0.exe
    ```
 
-Este arquivo `.exe` é o arquivo que você envia/vende para o seu cliente!
+---
+
+## 💡 Por que a pasta de build parecia ter mais de 1 Giga?
+
+1. **A pasta `dist-electron` continha arquivos temporários:**
+   * Durante a compilação, o Electron cria uma pasta interna chamada `win-unpacked` (o Chrome descompactado, caches de compilação e logs temporários) que soma centenas de megas.
+2. **Você só precisa enviar UM arquivo para o cliente:**
+   * Para vender e instalar nos seus clientes, você **NÃO precisa enviar a pasta inteira**.
+   * O único arquivo necessário é o instalador final:
+     **`INSTALADOR_FINAL_PARA_O_CLIENTE\OSNIR TURISMO Setup 2.5.0.exe`** (apenas ~75MB a 85MB).
+3. **Otimizações aplicadas:**
+   * O script agora usa compressão máxima (`LZMA`) e ignora todas as pastas `node_modules` desnecessárias, já que todo o código do sistema foi pré-compilado em JavaScript de alta performance.
+   * O script agora limpa os arquivos temporários e coloca o instalador pronto numa pasta exclusiva chamada `INSTALADOR_FINAL_PARA_O_CLIENTE`.
 
 ---
 

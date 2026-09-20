@@ -45,9 +45,9 @@ function drawPageOneHeader(
 ): void {
   const primaryRgb = hexToRgb(company.primaryColor, [6, 95, 70]);
 
-  // Top banner with chosen primary color (height 34mm)
+  // Top banner with chosen primary color (height 22mm for single-page A4 efficiency)
   doc.setFillColor(primaryRgb[0], primaryRgb[1], primaryRgb[2]);
-  doc.rect(0, 0, 210, 34, 'F');
+  doc.rect(0, 0, 210, 22, 'F');
 
   // Check if company has custom logo
   const hasLogo = Boolean(company.logoUrl && company.logoUrl.trim().length > 20);
@@ -61,8 +61,8 @@ function drawPageOneHeader(
       }
       // White backing card for logo
       doc.setFillColor(255, 255, 255);
-      doc.roundedRect(172, 4, 25, 26, 2, 2, 'F');
-      doc.addImage(company.logoUrl, format, 173.5, 5.5, 22, 23, undefined, 'FAST');
+      doc.roundedRect(180, 2.5, 17, 17, 1.5, 1.5, 'F');
+      doc.addImage(company.logoUrl, format, 181, 3.5, 15, 15, undefined, 'FAST');
     } catch (e) {
       console.warn('Erro ao inserir logo no PDF:', e);
     }
@@ -70,30 +70,111 @@ function drawPageOneHeader(
 
   // Company Name
   doc.setTextColor(255, 255, 255);
-  doc.setFontSize(15);
+  doc.setFontSize(13);
   doc.setFont('helvetica', 'bold');
-  const maxTitleWidth = hasLogo ? 155 : 185;
+  const maxTitleWidth = hasLogo ? 160 : 185;
   const companyNameUpper = (company.companyName || 'OSNIR TURISMO').toUpperCase();
   const safeName = fitText(doc, companyNameUpper, maxTitleWidth);
-  doc.text(safeName, 14, 12.5);
+  doc.text(safeName, 14, 8);
 
   // Subtitle / Document Title
-  doc.setFontSize(9);
+  doc.setFontSize(8.5);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(230, 245, 240);
-  doc.text(subtitle.toUpperCase(), 14, 20.5);
+  doc.text(subtitle.toUpperCase(), 14, 14);
 
   // Emission line & Official document badge
-  doc.setFontSize(7.5);
+  doc.setFontSize(7);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(240, 253, 244);
-  doc.text(`Emissão: ${emissionDate} às ${emissionTime}`, 14, 28);
+  doc.text(`Emissão: ${emissionDate} às ${emissionTime}`, 14, 19);
 
   if (!hasLogo) {
-    doc.text('DOCUMENTO OFICIAL DE TRANSPORTE', 196, 28, { align: 'right' });
+    doc.text('DOCUMENTO OFICIAL DE TRANSPORTE • PADRÃO FOLHA ÚNICA (A4)', 196, 19, { align: 'right' });
   } else {
-    doc.text('DOC. OFICIAL', 170, 28, { align: 'right' });
+    doc.text('FOLHA ÚNICA (A4)', 176, 19, { align: 'right' });
   }
+}
+
+/**
+ * Calculates optimal font size, padding, and row heights to strictly fit any passenger count on 1 single A4 page.
+ */
+interface SinglePageTableStyle {
+  fontSize: number;
+  headFontSize: number;
+  cellPadding: { top: number; right: number; bottom: number; left: number };
+  minCellHeight: number;
+}
+
+function getSinglePageTableStyles(rowCount: number, availableHeightMm: number = 241): SinglePageTableStyle {
+  const safeCount = Math.max(rowCount, 1);
+  const targetRowHeight = (availableHeightMm - 7) / safeCount;
+
+  if (targetRowHeight >= 8.5) {
+    return {
+      fontSize: 8.5,
+      headFontSize: 8,
+      cellPadding: { top: 2.2, right: 2, bottom: 2.2, left: 2 },
+      minCellHeight: 6.8,
+    };
+  } else if (targetRowHeight >= 6.5) {
+    return {
+      fontSize: 8.0,
+      headFontSize: 7.8,
+      cellPadding: { top: 1.6, right: 1.8, bottom: 1.6, left: 1.8 },
+      minCellHeight: 5.6,
+    };
+  } else if (targetRowHeight >= 5.0) {
+    return {
+      fontSize: 7.4,
+      headFontSize: 7.2,
+      cellPadding: { top: 1.1, right: 1.5, bottom: 1.1, left: 1.5 },
+      minCellHeight: 4.6,
+    };
+  } else if (targetRowHeight >= 4.0) {
+    return {
+      fontSize: 6.8,
+      headFontSize: 6.6,
+      cellPadding: { top: 0.65, right: 1.2, bottom: 0.65, left: 1.2 },
+      minCellHeight: 3.7,
+    };
+  } else {
+    return {
+      fontSize: 6.0,
+      headFontSize: 6.0,
+      cellPadding: { top: 0.35, right: 1.0, bottom: 0.35, left: 1.0 },
+      minCellHeight: 3.0,
+    };
+  }
+}
+
+/**
+ * Ensures strict single-page output on A4 and applies single-sheet footer.
+ */
+function applySinglePageFooter(
+  doc: jsPDF,
+  company: CompanyConfig
+): void {
+  // Enforce single-page guarantee: eliminate any accidental extra pages
+  while (doc.getNumberOfPages() > 1) {
+    doc.deletePage(doc.getNumberOfPages());
+  }
+  doc.setPage(1);
+
+  const companyNameUpper = (company.companyName || 'OSNIR TURISMO').toUpperCase();
+
+  // Bottom footer dividing line at Y=286
+  doc.setDrawColor(203, 213, 225);
+  doc.setLineWidth(0.3);
+  doc.line(14, 286, 196, 286);
+
+  // Footer text
+  doc.setFontSize(7);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(100, 116, 139);
+  doc.text(`${companyNameUpper} • Documento Oficial de Viagem • Formato Folha Única A4`, 14, 290.5);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Folha Única (1 de 1)', 196, 290.5, { align: 'right' });
 }
 
 /**
@@ -142,7 +223,7 @@ function applyFootersAndHeaders(
 }
 
 /**
- * 1. Generate Driver Trip Manifest PDF
+ * 1. Generate Driver Trip Manifest PDF - Strictly 1 Single A4 Page
  */
 export function generateDriverTripPdf(
   driver: Driver,
@@ -163,44 +244,48 @@ export function generateDriverTripPdf(
   const horaFormatada = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   const subtitle = 'Manifesto de Viagem por Motorista';
 
-  // Page 1 Header
+  // Page 1 Header (Height 22mm)
   drawPageOneHeader(doc, subtitle, dataFormatada, horaFormatada, company);
 
-  // Driver Info Card (Box from Y=38 to Y=62)
-  const boxY = 38;
-  const boxH = 24;
+  // Driver Info Card (Compact box from Y=24 to Y=41, height 17mm)
+  const boxY = 24;
+  const boxH = 17;
   doc.setFillColor(248, 250, 252);
   doc.setDrawColor(203, 213, 225);
-  doc.roundedRect(14, boxY, 182, boxH, 2.5, 2.5, 'FD');
+  doc.roundedRect(14, boxY, 182, boxH, 2, 2, 'FD');
 
-  // Box Title
-  doc.setTextColor(71, 85, 105);
-  doc.setFontSize(8);
-  doc.setFont('helvetica', 'bold');
-  doc.text('DADOS DO MOTORISTA', 20, 44.5);
-
-  // Left Column: Driver Name
-  doc.setFontSize(8);
+  // Row 1 (Y=29.5)
+  doc.setFontSize(7.5);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(100, 116, 139);
-  doc.text('Motorista Designado:', 20, 51.5);
-
-  doc.setFontSize(10.5);
+  doc.text('Motorista Designado:', 18, 29.5);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(15, 23, 42);
-  const safeDriverName = fitText(doc, driver.fullName.toUpperCase(), 95);
-  doc.text(safeDriverName, 20, 57.5);
+  const safeDriverName = fitText(doc, driver.fullName.toUpperCase(), 80);
+  doc.text(safeDriverName, 49, 29.5);
 
-  // Right Column: Total Passengers
-  doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(100, 116, 139);
-  doc.text('Passageiros Vinculados:', 125, 51.5);
-
-  doc.setFontSize(10.5);
+  doc.text('Passageiros Vinculados:', 130, 29.5);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(primaryRgb[0], primaryRgb[1], primaryRgb[2]);
-  doc.text(`${driverPassengers.length} passageiro(s)`, 125, 57.5);
+  doc.text(`${driverPassengers.length} passageiro(s)`, 166, 29.5);
+
+  // Row 2 (Y=36.5)
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(100, 116, 139);
+  doc.text('Contato Motorista:', 18, 36.5);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(15, 23, 42);
+  const safeVehicle = fitText(doc, (driver.phone ? `TEL: ${driver.phone}` : 'FROTA REGULAR / OPERACIONAL').toUpperCase(), 75);
+  doc.text(safeVehicle, 49, 36.5);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(100, 116, 139);
+  doc.text('Situação:', 130, 36.5);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(6, 95, 70);
+  doc.text('CONFIRMADO (FOLHA ÚNICA)', 145, 36.5);
 
   // Table Data
   let tableRows: any[] = [];
@@ -217,7 +302,7 @@ export function generateDriverTripPdf(
   } else {
     tableRows = driverPassengers.map((p, index) => [
       (index + 1).toString(),
-      p.fullName,
+      p.fullName.toUpperCase(),
       p.origin,
       p.destination,
       p.seller,
@@ -225,26 +310,29 @@ export function generateDriverTripPdf(
     ]);
   }
 
-  // Start table at Y=68 (6mm clearance below the summary box)
+  // Dynamic table sizing based on passenger count to strictly guarantee single A4 page
+  const tableStyles = getSinglePageTableStyles(tableRows.length, 241);
+
+  // Start table at Y=43 (clearance of 2mm below the info card)
   autoTable(doc, {
-    startY: 68,
+    startY: 43,
     head: [['Nº', 'NOME COMPLETO DO PASSAGEIRO', 'ORIGEM', 'DESTINO DA VIAGEM', 'VENDEDOR', 'ASSINATURA / EMBARQUE']],
     body: tableRows,
     styles: {
       font: 'helvetica',
-      fontSize: 8.5,
-      cellPadding: { top: 2.8, right: 2.2, bottom: 2.8, left: 2.2 },
+      fontSize: tableStyles.fontSize,
+      cellPadding: tableStyles.cellPadding,
       lineColor: [226, 232, 240],
       lineWidth: 0.2,
       textColor: [30, 41, 59],
       valign: 'middle',
-      overflow: 'linebreak',
+      overflow: 'ellipsize',
     },
     headStyles: {
       fillColor: primaryRgb,
       textColor: [255, 255, 255],
       fontStyle: 'bold',
-      fontSize: 8,
+      fontSize: tableStyles.headFontSize,
       halign: 'left',
       valign: 'middle',
     },
@@ -252,18 +340,18 @@ export function generateDriverTripPdf(
       fillColor: [248, 250, 252],
     },
     columnStyles: {
-      0: { cellWidth: 10, halign: 'center' },
-      1: { cellWidth: 54, fontStyle: 'bold' },
-      2: { cellWidth: 32 },
-      3: { cellWidth: 32 },
+      0: { cellWidth: 9, halign: 'center' },
+      1: { cellWidth: 55, fontStyle: 'bold' },
+      2: { cellWidth: 30 },
+      3: { cellWidth: 30 },
       4: { cellWidth: 26 },
-      5: { cellWidth: 28, halign: 'center' },
+      5: { cellWidth: 32, halign: 'center' },
     },
-    margin: { top: 18, right: 14, bottom: 22, left: 14 },
-    showHead: 'everyPage',
+    margin: { top: 12, right: 14, bottom: 12, left: 14 },
+    pageBreak: 'avoid',
   });
 
-  applyFootersAndHeaders(doc, subtitle, dataFormatada, horaFormatada, company);
+  applySinglePageFooter(doc, company);
 
   const sanitizedDriverName = driver.fullName.replace(/\s+/g, '_').toLowerCase();
   const safeDate = dataFormatada.replace(/\//g, '-');
@@ -302,75 +390,63 @@ export function generateTripOfficialPdf(
     }
   }
 
-  // Page 1 Header
+  // Page 1 Header (Height 22mm)
   drawPageOneHeader(doc, subtitle, dataFormatada, horaFormatada, company);
 
-  // Trip Summary Box (Box from Y=38 to Y=74, height 36mm)
-  const boxY = 38;
-  const boxH = 36;
+  // Trip Summary Box (Compact box from Y=24 to Y=41, height 17mm)
+  const boxY = 24;
+  const boxH = 17;
   doc.setFillColor(248, 250, 252);
   doc.setDrawColor(203, 213, 225);
-  doc.roundedRect(14, boxY, 182, boxH, 2.5, 2.5, 'FD');
+  doc.roundedRect(14, boxY, 182, boxH, 2, 2, 'FD');
 
-  // Box Title
-  doc.setTextColor(71, 85, 105);
-  doc.setFontSize(8);
-  doc.setFont('helvetica', 'bold');
-  doc.text('INFORMAÇÕES DA VIAGEM PROGRAMADA', 20, 44.5);
-
-  // Column 1 (Left: X=20, max width 85mm)
-  // Row 1: Date
-  doc.setFontSize(8);
+  // Row 1 (Y=29.5)
+  doc.setFontSize(7.5);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(100, 116, 139);
-  doc.text('Data da Viagem:', 20, 52);
+  doc.text('Data da Viagem:', 18, 29.5);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(15, 23, 42);
-  doc.text(displayTripDate, 50, 52);
+  doc.text(displayTripDate, 41, 29.5);
 
-  // Row 2: Origin
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(100, 116, 139);
-  doc.text('Origem:', 20, 59.5);
+  doc.text('Origem / Destino:', 75, 29.5);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(15, 23, 42);
-  const safeOrigin = fitText(doc, trip.origin, 58);
-  doc.text(safeOrigin, 50, 59.5);
+  const safeRoute = fitText(doc, `${trip.origin} ➔ ${trip.destination}`.toUpperCase(), 55);
+  doc.text(safeRoute, 98, 29.5);
 
-  // Row 3: Destination
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(100, 116, 139);
-  doc.text('Destino:', 20, 67);
+  doc.text('Motorista:', 148, 29.5);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(15, 23, 42);
-  const safeDest = fitText(doc, trip.destination, 58);
-  doc.text(safeDest, 50, 67);
+  const safeDriver = fitText(doc, (driver ? driver.fullName : 'A DEFINIR').toUpperCase(), 38);
+  doc.text(safeDriver, 163, 29.5);
 
-  // Column 2 (Right: X=115, max width 75mm)
-  // Row 1: Driver
+  // Row 2 (Y=36.5)
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(100, 116, 139);
-  doc.text('Motorista:', 115, 52);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(15, 23, 42);
-  const safeDriver = fitText(doc, (driver ? driver.fullName : 'NÃO DEFINIDO').toUpperCase(), 52);
-  doc.text(safeDriver, 142, 52);
-
-  // Row 2: Total Passengers
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(100, 116, 139);
-  doc.text('Passageiros:', 115, 59.5);
+  doc.text('Passageiros:', 18, 36.5);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(primaryRgb[0], primaryRgb[1], primaryRgb[2]);
-  doc.text(`${tripPassengers.length} confirmado(s)`, 142, 59.5);
+  doc.text(`${tripPassengers.length} confirmado(s)`, 41, 36.5);
 
-  // Row 3: Status
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(100, 116, 139);
-  doc.text('Situação:', 115, 67);
+  doc.text('Tipo de Viagem:', 75, 36.5);
   doc.setFont('helvetica', 'bold');
-  doc.setTextColor(71, 85, 105);
-  doc.text('Programada', 142, 67);
+  doc.setTextColor(15, 23, 42);
+  const safeBus = fitText(doc, 'TRANSPORTE REGULAR / PROGRAMADO', 48);
+  doc.text(safeBus, 98, 36.5);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(100, 116, 139);
+  doc.text('Situação:', 148, 36.5);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(6, 95, 70);
+  doc.text('CONFIRMADA (1 FOLHA)', 163, 36.5);
 
   // Table Data
   let tableRows: any[] = [];
@@ -387,7 +463,7 @@ export function generateTripOfficialPdf(
   } else {
     tableRows = tripPassengers.map((p, index) => [
       (index + 1).toString(),
-      p.fullName,
+      p.fullName.toUpperCase(),
       p.origin,
       p.destination,
       p.seller,
@@ -395,26 +471,29 @@ export function generateTripOfficialPdf(
     ]);
   }
 
-  // Start table at Y=80 (6mm clearance below the summary box)
+  // Dynamic table sizing based on passenger count to strictly guarantee single A4 page
+  const tableStyles = getSinglePageTableStyles(tableRows.length, 241);
+
+  // Start table at Y=43 (clearance of 2mm below summary box)
   autoTable(doc, {
-    startY: 80,
+    startY: 43,
     head: [['Nº', 'NOME COMPLETO DO PASSAGEIRO', 'ORIGEM', 'DESTINO', 'VENDEDOR', 'CHECK-IN / ASSINATURA']],
     body: tableRows,
     styles: {
       font: 'helvetica',
-      fontSize: 8.5,
-      cellPadding: { top: 2.8, right: 2.2, bottom: 2.8, left: 2.2 },
+      fontSize: tableStyles.fontSize,
+      cellPadding: tableStyles.cellPadding,
       lineColor: [226, 232, 240],
       lineWidth: 0.2,
       textColor: [30, 41, 59],
       valign: 'middle',
-      overflow: 'linebreak',
+      overflow: 'ellipsize',
     },
     headStyles: {
       fillColor: primaryRgb,
       textColor: [255, 255, 255],
       fontStyle: 'bold',
-      fontSize: 8,
+      fontSize: tableStyles.headFontSize,
       halign: 'left',
       valign: 'middle',
     },
@@ -422,18 +501,18 @@ export function generateTripOfficialPdf(
       fillColor: [248, 250, 252],
     },
     columnStyles: {
-      0: { cellWidth: 10, halign: 'center' },
-      1: { cellWidth: 54, fontStyle: 'bold' },
-      2: { cellWidth: 32 },
-      3: { cellWidth: 32 },
+      0: { cellWidth: 9, halign: 'center' },
+      1: { cellWidth: 55, fontStyle: 'bold' },
+      2: { cellWidth: 30 },
+      3: { cellWidth: 30 },
       4: { cellWidth: 26 },
-      5: { cellWidth: 28, halign: 'center' },
+      5: { cellWidth: 32, halign: 'center' },
     },
-    margin: { top: 18, right: 14, bottom: 22, left: 14 },
-    showHead: 'everyPage',
+    margin: { top: 12, right: 14, bottom: 12, left: 14 },
+    pageBreak: 'avoid',
   });
 
-  applyFootersAndHeaders(doc, subtitle, dataFormatada, horaFormatada, company);
+  applySinglePageFooter(doc, company);
 
   const safeFileOrigin = trip.origin.replace(/\s+/g, '_').toLowerCase();
   const safeFileDest = trip.destination.replace(/\s+/g, '_').toLowerCase();
@@ -467,44 +546,47 @@ export function generateGeneralPassengersListPdf(
   const driverMap = new Map<string, string>();
   drivers.forEach((d) => driverMap.set(d.id, d.fullName));
 
-  // Page 1 Header
+  // Page 1 Header (Height 22mm)
   drawPageOneHeader(doc, subtitle, dataFormatada, horaFormatada, company);
 
-  // Summary Card (Box from Y=38 to Y=62)
-  const boxY = 38;
-  const boxH = 24;
+  // Summary Card (Compact box from Y=24 to Y=41, height 17mm)
+  const boxY = 24;
+  const boxH = 17;
   doc.setFillColor(248, 250, 252);
   doc.setDrawColor(203, 213, 225);
-  doc.roundedRect(14, boxY, 182, boxH, 2.5, 2.5, 'FD');
+  doc.roundedRect(14, boxY, 182, boxH, 2, 2, 'FD');
 
-  // Box Title
-  doc.setTextColor(71, 85, 105);
-  doc.setFontSize(8);
-  doc.setFont('helvetica', 'bold');
-  doc.text('INFORMAÇÕES DA LISTA GERAL', 20, 44.5);
-
-  // Left Column: Total Passengers
-  doc.setFontSize(8);
+  // Row 1 (Y=29.5)
+  doc.setFontSize(7.5);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(100, 116, 139);
-  doc.text('Total de Passageiros:', 20, 51.5);
-
-  doc.setFontSize(10.5);
+  doc.text('Total de Passageiros:', 18, 29.5);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(15, 23, 42);
-  doc.text(`${passengers.length} passageiro(s) listado(s)`, 20, 57.5);
+  doc.text(`${passengers.length} passageiro(s) listado(s)`, 49, 29.5);
 
-  // Right Column: Filter Applied
-  doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(100, 116, 139);
-  doc.text('Filtro Aplicado:', 120, 51.5);
-
-  doc.setFontSize(9.5);
+  doc.text('Filtro Aplicado:', 125, 29.5);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(primaryRgb[0], primaryRgb[1], primaryRgb[2]);
-  const safeFilter = fitText(doc, filterNote || 'Todos os Registros', 70);
-  doc.text(safeFilter, 120, 57.5);
+  const safeFilter = fitText(doc, filterNote || 'Todos os Registros', 48);
+  doc.text(safeFilter, 146, 29.5);
+
+  // Row 2 (Y=36.5)
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(100, 116, 139);
+  doc.text('Documento / Formato:', 18, 36.5);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(15, 23, 42);
+  doc.text('LISTAGEM OPERACIONAL GERAL', 49, 36.5);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(100, 116, 139);
+  doc.text('Situação:', 125, 36.5);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(6, 95, 70);
+  doc.text('REGULARIZADO (FOLHA ÚNICA)', 146, 36.5);
 
   // Table Data
   let tableRows: any[] = [];
@@ -523,7 +605,7 @@ export function generateGeneralPassengersListPdf(
       const driverName = p.driverId ? (driverMap.get(p.driverId) || 'Não localizado') : 'Não destinado';
       return [
         (index + 1).toString(),
-        p.fullName,
+        p.fullName.toUpperCase(),
         p.origin,
         p.destination,
         p.seller,
@@ -532,26 +614,29 @@ export function generateGeneralPassengersListPdf(
     });
   }
 
-  // Start table at Y=68 (6mm clearance)
+  // Dynamic table sizing based on passenger count to strictly guarantee single A4 page
+  const tableStyles = getSinglePageTableStyles(tableRows.length, 241);
+
+  // Start table at Y=43 (clearance of 2mm)
   autoTable(doc, {
-    startY: 68,
+    startY: 43,
     head: [['Nº', 'NOME COMPLETO DO CLIENTE', 'ORIGEM', 'DESTINO DA VIAGEM', 'VENDEDOR', 'MOTORISTA DESTINADO']],
     body: tableRows,
     styles: {
       font: 'helvetica',
-      fontSize: 8.5,
-      cellPadding: { top: 2.8, right: 2.2, bottom: 2.8, left: 2.2 },
+      fontSize: tableStyles.fontSize,
+      cellPadding: tableStyles.cellPadding,
       lineColor: [226, 232, 240],
       lineWidth: 0.2,
       textColor: [30, 41, 59],
       valign: 'middle',
-      overflow: 'linebreak',
+      overflow: 'ellipsize',
     },
     headStyles: {
       fillColor: primaryRgb,
       textColor: [255, 255, 255],
       fontStyle: 'bold',
-      fontSize: 8,
+      fontSize: tableStyles.headFontSize,
       halign: 'left',
       valign: 'middle',
     },
@@ -559,25 +644,25 @@ export function generateGeneralPassengersListPdf(
       fillColor: [248, 250, 252],
     },
     columnStyles: {
-      0: { cellWidth: 10, halign: 'center' },
-      1: { cellWidth: 50, fontStyle: 'bold' },
+      0: { cellWidth: 9, halign: 'center' },
+      1: { cellWidth: 54, fontStyle: 'bold' },
       2: { cellWidth: 30 },
       3: { cellWidth: 30 },
-      4: { cellWidth: 28 },
-      5: { cellWidth: 34, fontStyle: 'italic' },
+      4: { cellWidth: 26 },
+      5: { cellWidth: 33, fontStyle: 'italic' },
     },
-    margin: { top: 18, right: 14, bottom: 22, left: 14 },
-    showHead: 'everyPage',
+    margin: { top: 12, right: 14, bottom: 12, left: 14 },
+    pageBreak: 'avoid',
   });
 
-  applyFootersAndHeaders(doc, subtitle, dataFormatada, horaFormatada, company);
+  applySinglePageFooter(doc, company);
 
   const safeDate = dataFormatada.replace(/\//g, '-');
   doc.save(`Lista_Geral_Passageiros_${safeDate}.pdf`);
 }
 
 /**
- * 4. Generate Seller Sales Report PDF
+ * 4. Generate Seller Sales Report PDF - Strictly 1 Single A4 Page
  */
 export function generateSellerReportPdf(
   sellerStats: { seller: string; count: number }[],
@@ -597,43 +682,46 @@ export function generateSellerReportPdf(
   const horaFormatada = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   const subtitle = 'Relatório de Vendas por Vendedor';
 
-  // Page 1 Header
+  // Page 1 Header (Height 22mm)
   drawPageOneHeader(doc, subtitle, dataFormatada, horaFormatada, company);
 
-  // Summary Card (Box from Y=38 to Y=62)
-  const boxY = 38;
-  const boxH = 24;
+  // Summary Card (Compact box from Y=24 to Y=41, height 17mm)
+  const boxY = 24;
+  const boxH = 17;
   doc.setFillColor(248, 250, 252);
   doc.setDrawColor(203, 213, 225);
-  doc.roundedRect(14, boxY, 182, boxH, 2.5, 2.5, 'FD');
+  doc.roundedRect(14, boxY, 182, boxH, 2, 2, 'FD');
 
-  // Box Title
-  doc.setTextColor(71, 85, 105);
-  doc.setFontSize(8);
-  doc.setFont('helvetica', 'bold');
-  doc.text('RESUMO GERAL DAS PASSAGENS VENDIDAS', 20, 44.5);
-
-  // Left Column: Total Sales
-  doc.setFontSize(8);
+  // Row 1 (Y=29.5)
+  doc.setFontSize(7.5);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(100, 116, 139);
-  doc.text('Total Geral de Vendas:', 20, 51.5);
-
-  doc.setFontSize(10.5);
+  doc.text('Total Geral de Vendas:', 18, 29.5);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(15, 23, 42);
-  doc.text(`${totalSales} passagens`, 20, 57.5);
+  doc.text(`${totalSales} passagens`, 54, 29.5);
 
-  // Right Column: Total Active Sellers
-  doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(100, 116, 139);
-  doc.text('Vendedores Ativos:', 125, 51.5);
-
-  doc.setFontSize(10.5);
+  doc.text('Vendedores Ativos:', 125, 29.5);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(primaryRgb[0], primaryRgb[1], primaryRgb[2]);
-  doc.text(`${sellerStats.length} vendedor(es)`, 125, 57.5);
+  doc.text(`${sellerStats.length} vendedor(es)`, 155, 29.5);
+
+  // Row 2 (Y=36.5)
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(100, 116, 139);
+  doc.text('Tipo de Relatório:', 18, 36.5);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(15, 23, 42);
+  doc.text('DESEMPENHO COMERCIAL & RANKING', 54, 36.5);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(100, 116, 139);
+  doc.text('Situação:', 125, 36.5);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(6, 95, 70);
+  doc.text('CONCLUÍDO (FOLHA ÚNICA)', 155, 36.5);
 
   // Table Data
   let tableRows: any[] = [];
@@ -652,33 +740,36 @@ export function generateSellerReportPdf(
       const percentage = totalSales > 0 ? ((stat.count / totalSales) * 100).toFixed(1) + '%' : '0%';
       return [
         (index + 1).toString(),
-        stat.seller,
+        stat.seller.toUpperCase(),
         `${stat.count} ${stat.count === 1 ? 'passagem' : 'passagens'}`,
         percentage,
       ];
     });
   }
 
-  // Start table at Y=68 (6mm clearance)
+  // Dynamic table sizing based on seller count to strictly guarantee single A4 page
+  const tableStyles = getSinglePageTableStyles(tableRows.length, 241);
+
+  // Start table at Y=43 (clearance of 2mm)
   autoTable(doc, {
-    startY: 68,
+    startY: 43,
     head: [['RANK', 'NOME DO VENDEDOR', 'PASSAGENS VENDIDAS', 'PARTICIPAÇÃO %']],
     body: tableRows,
     styles: {
       font: 'helvetica',
-      fontSize: 8.5,
-      cellPadding: { top: 3, right: 2.5, bottom: 3, left: 2.5 },
+      fontSize: tableStyles.fontSize,
+      cellPadding: tableStyles.cellPadding,
       lineColor: [226, 232, 240],
       lineWidth: 0.2,
       textColor: [30, 41, 59],
       valign: 'middle',
-      overflow: 'linebreak',
+      overflow: 'ellipsize',
     },
     headStyles: {
       fillColor: primaryRgb,
       textColor: [255, 255, 255],
       fontStyle: 'bold',
-      fontSize: 8.5,
+      fontSize: tableStyles.headFontSize,
       halign: 'left',
       valign: 'middle',
     },
@@ -691,18 +782,18 @@ export function generateSellerReportPdf(
       2: { cellWidth: 44, halign: 'center', fontStyle: 'bold' },
       3: { cellWidth: 36, halign: 'center' },
     },
-    margin: { top: 18, right: 14, bottom: 22, left: 14 },
-    showHead: 'everyPage',
+    margin: { top: 12, right: 14, bottom: 12, left: 14 },
+    pageBreak: 'avoid',
   });
 
-  applyFootersAndHeaders(doc, subtitle, dataFormatada, horaFormatada, company);
+  applySinglePageFooter(doc, company);
 
   const safeDate = dataFormatada.replace(/\//g, '-');
   doc.save(`Relatorio_Vendas_Vendedores_${safeDate}.pdf`);
 }
 
 /**
- * 5. Generate Daily List (Lista do Dia) PDF
+ * 5. Generate Daily List (Lista do Dia) PDF - Strictly 1 Single A4 Page
  */
 export function generateDailyListPdf(
   dateString: string,
@@ -738,43 +829,46 @@ export function generateDailyListPdf(
   const driverMap = new Map<string, string>();
   drivers.forEach((d) => driverMap.set(d.id, d.fullName));
 
-  // Page 1 Header
+  // Page 1 Header (Height 22mm)
   drawPageOneHeader(doc, subtitle, dataEmissao, horaEmissao, company);
 
-  // Summary Card Box (Y=38 to Y=62)
-  const boxY = 38;
-  const boxH = 24;
+  // Summary Card Box (Compact box from Y=24 to Y=41, height 17mm)
+  const boxY = 24;
+  const boxH = 17;
   doc.setFillColor(248, 250, 252);
   doc.setDrawColor(203, 213, 225);
-  doc.roundedRect(14, boxY, 182, boxH, 2.5, 2.5, 'FD');
+  doc.roundedRect(14, boxY, 182, boxH, 2, 2, 'FD');
 
-  // Box Title
-  doc.setTextColor(71, 85, 105);
-  doc.setFontSize(8);
-  doc.setFont('helvetica', 'bold');
-  doc.text('DADOS DA LISTA DO DIA', 20, 44.5);
-
-  // Left column: Target Date
-  doc.setFontSize(8);
+  // Row 1 (Y=29.5)
+  doc.setFontSize(7.5);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(100, 116, 139);
-  doc.text('Data de Operação:', 20, 51.5);
-
-  doc.setFontSize(10.5);
+  doc.text('Data de Operação:', 18, 29.5);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(primaryRgb[0], primaryRgb[1], primaryRgb[2]);
-  doc.text(displayDate, 20, 57.5);
+  doc.text(displayDate, 48, 29.5);
 
-  // Right column: Total passengers
-  doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(100, 116, 139);
-  doc.text('Total de Clientes no Dia:', 110, 51.5);
-
-  doc.setFontSize(10.5);
+  doc.text('Total de Clientes no Dia:', 115, 29.5);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(15, 23, 42);
-  doc.text(`${passengers.length} cliente(s) / passageiro(s)`, 110, 57.5);
+  doc.text(`${passengers.length} cliente(s) / passageiro(s)`, 152, 29.5);
+
+  // Row 2 (Y=36.5)
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(100, 116, 139);
+  doc.text('Operação:', 18, 36.5);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(15, 23, 42);
+  doc.text('EMBARQUE DIÁRIO DE PASSAGEIROS', 48, 36.5);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(100, 116, 139);
+  doc.text('Situação:', 115, 36.5);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(6, 95, 70);
+  doc.text('CONFIRMADO (FOLHA ÚNICA)', 152, 36.5);
 
   // Build table rows
   const tableRows = passengers.map((p, index) => {
@@ -794,26 +888,29 @@ export function generateDailyListPdf(
     tableRows.push(['-', 'NENHUM PASSAGEIRO AGENDADO PARA ESTE DIA', '-', '-', '-', '-', '']);
   }
 
-  // Start table at Y=68 (6mm below box)
+  // Dynamic table sizing based on passenger count to strictly guarantee single A4 page
+  const tableStyles = getSinglePageTableStyles(tableRows.length, 241);
+
+  // Start table at Y=43 (clearance of 2mm below box)
   autoTable(doc, {
-    startY: 68,
+    startY: 43,
     head: [['Nº', 'NOME DO PASSAGEIRO', 'ORIGEM', 'DESTINO', 'VENDEDOR', 'MOTORISTA', 'CHECK-IN']],
     body: tableRows,
     styles: {
       font: 'helvetica',
-      fontSize: 8,
-      cellPadding: { top: 2.8, right: 2, bottom: 2.8, left: 2 },
+      fontSize: tableStyles.fontSize,
+      cellPadding: tableStyles.cellPadding,
       lineColor: [226, 232, 240],
       lineWidth: 0.2,
       textColor: [30, 41, 59],
       valign: 'middle',
-      overflow: 'linebreak',
+      overflow: 'ellipsize',
     },
     headStyles: {
       fillColor: primaryRgb,
       textColor: [255, 255, 255],
       fontStyle: 'bold',
-      fontSize: 7.8,
+      fontSize: tableStyles.headFontSize,
       halign: 'left',
       valign: 'middle',
     },
@@ -829,11 +926,11 @@ export function generateDailyListPdf(
       5: { cellWidth: 28 },
       6: { cellWidth: 19, halign: 'center' },
     },
-    margin: { top: 18, right: 14, bottom: 22, left: 14 },
-    showHead: 'everyPage',
+    margin: { top: 12, right: 14, bottom: 12, left: 14 },
+    pageBreak: 'avoid',
   });
 
-  applyFootersAndHeaders(doc, subtitle, dataEmissao, horaEmissao, company);
+  applySinglePageFooter(doc, company);
 
   const safeFileDate = displayDate.replace(/\//g, '-');
   doc.save(`Lista_do_Dia_${safeFileDate}.pdf`);
