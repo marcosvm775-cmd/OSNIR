@@ -2,6 +2,8 @@
   "name": "osnir-turismo",
   "private": true,
   "version": "2.5.0",
+  "description": "Sistema de Gestao OSNIR TURISMO",
+  "author": "OSNIR TURISMO",
   "type": "module",
   "main": "electron-main.js",
   "scripts": {
@@ -18,6 +20,7 @@
   "build": {
     "appId": "com.osnirturismo.app",
     "productName": "OSNIR TURISMO",
+    "electronVersion": "34.0.0",
     "compression": "maximum",
     "asar": true,
     "directories": {
@@ -33,7 +36,6 @@
       "!*.bat",
       "!*.md"
     ],
-    "includeSubNodeModules": false,
     "win": {
       "target": [
         {
@@ -71,6 +73,8 @@
     "vite": "^6.2.3"
   },
   "devDependencies": {
+    "electron": "^34.0.0",
+    "electron-builder": "^26.15.3",
     "@capacitor/android": "^6.2.0",
     "@capacitor/cli": "^6.2.0",
     "@capacitor/core": "^6.2.0",

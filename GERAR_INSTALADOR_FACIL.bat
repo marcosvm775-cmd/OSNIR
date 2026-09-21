@@ -16,41 +16,47 @@ echo.
 :: 1. Verificar se a pasta dist existe
 echo 1. Verificando os arquivos do sistema...
 if not exist "%~dp0dist\index.html" (
-    echo [INFO] Compilando arquivos com o Vite...
-    if exist "%~dp0node_modules\.bin\vite.cmd" (
-        call "%~dp0node_modules\.bin\vite.cmd" build
-    ) else (
-        call npx --yes vite build
-    )
+    echo [INFO] Compilando arquivos do sistema com o Vite...
+    call npx vite build
 ) else (
     echo [OK] Arquivos compilados do sistema ja estao prontos na pasta dist!
 )
 
+:: 2. Garantir que o Electron esteja disponivel
 echo.
-echo 2. Empacotando o instalador executavel (.exe) para Windows...
+echo 2. Verificando dependencias do Electron...
+if not exist "%~dp0node_modules\electron" (
+    echo [INFO] Instalando pacote do Electron... Aguarde alguns instantes...
+    call npm install electron@34.0.0 --save-dev --no-audit --no-fund
+) else (
+    echo [OK] Electron pronto!
+)
+
+echo.
+echo 3. Empacotando com o Electron Builder e salvando o log...
 echo    Aguarde cerca de 1 a 2 minutos...
 echo.
 
-set "BUILDER_CMD="
-if exist "%~dp0node_modules\.bin\electron-builder.cmd" (
-    set "BUILDER_CMD=%~dp0node_modules\.bin\electron-builder.cmd"
-) else (
-    set "BUILDER_CMD=npx --yes electron-builder"
-)
-
-call %BUILDER_CMD% --win nsis
+call npx electron-builder --win nsis > "%~dp0relatorio_erro_electron.txt" 2>&1
 
 if %errorlevel% neq 0 (
     color 0C
     echo.
-    echo [ERRO] Ocorreu uma falha ao empacotar com o Electron Builder.
-    echo Verifique a mensagem acima na tela.
+    echo ===============================================================================
+    echo               ATENCAO: O RELATORIO EXATO DO ELECTRON FOI SALVO!
+    echo ===============================================================================
+    echo.
+    echo Abrindo relatorio_erro_electron.txt no Bloco de Notas para voce ver o motivo real...
+    echo.
+    if exist "%~dp0relatorio_erro_electron.txt" (
+        start "" notepad "%~dp0relatorio_erro_electron.txt"
+    )
     pause
     exit /b 1
 )
 
 echo.
-echo 3. Organizando o instalador final...
+echo 4. Organizando o instalador final...
 set "PASTA_FINAL=%~dp0INSTALADOR_FINAL_PARA_O_CLIENTE"
 if not exist "%PASTA_FINAL%" mkdir "%PASTA_FINAL%"
 

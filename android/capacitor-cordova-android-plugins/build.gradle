@@ -27,6 +27,15 @@ android {
     lintOptions {
         abortOnError false
     }
+    buildTypes {
+        debug {
+            matchingFallbacks = ['release']
+        }
+        release {
+            minifyEnabled false
+            matchingFallbacks = ['release']
+        }
+    }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
