@@ -61,13 +61,13 @@ export const Header: React.FC<HeaderProps> = ({
       className="text-white shadow-md sticky top-0 z-30 border-b border-black/10 backdrop-blur-md transition-colors duration-200"
       style={{ backgroundColor: currentPrimaryColor }}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-3.5">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3.5">
         {/* Top Header Bar: Brand + Quick Actions */}
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center justify-between gap-1.5 sm:gap-3">
           {/* Logo & Brand Info */}
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
             {companyConfig?.logoUrl ? (
-              <div className="h-10 w-13 bg-white rounded-xl p-1 border-2 border-white/60 flex items-center justify-center shadow-xs shrink-0 overflow-hidden">
+              <div className="h-8 w-10 sm:h-10 sm:w-13 bg-white rounded-xl p-0.5 sm:p-1 border-2 border-white/60 flex items-center justify-center shadow-xs shrink-0 overflow-hidden">
                 <img
                   src={companyConfig.logoUrl}
                   alt={companyName}
@@ -75,43 +75,45 @@ export const Header: React.FC<HeaderProps> = ({
                 />
               </div>
             ) : (
-              <div className="w-10 h-10 rounded-xl bg-white/20 border-2 border-white/40 flex items-center justify-center shadow-sm shrink-0">
-                <Bus className="w-6 h-6 text-white" />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-white/20 border-2 border-white/40 flex items-center justify-center shadow-sm shrink-0">
+                <Bus className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
               </div>
             )}
 
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <h1 className="text-lg sm:text-xl font-black tracking-tight text-white leading-tight uppercase truncate max-w-[220px] sm:max-w-md">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <h1 className="text-sm sm:text-xl font-black tracking-tight text-white leading-tight uppercase truncate">
                   {companyName}
                 </h1>
-                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-black/25 text-white border-2 border-white/30 shrink-0">
+                <span className="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded bg-black/25 text-white border border-white/30 shrink-0 hidden xs:inline">
                   SISTEMA
                 </span>
               </div>
-              <p className="text-[11px] sm:text-xs text-white/80 font-medium truncate max-w-[240px] sm:max-w-md">
+              <p className="text-[9px] sm:text-xs text-white/80 font-medium truncate">
                 {companyConfig?.phone
-                  ? `Contato: ${companyConfig.phone} • Controle de Passageiros e Viagens`
-                  : 'Controle de Passageiros, Motoristas e Escala Diária'}
+                  ? `Contato: ${companyConfig.phone}`
+                  : 'Controle de Passageiros'}
               </p>
             </div>
           </div>
 
           {/* Right Action buttons */}
-          <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
-            {/* Botão Instalar App no Celular / PWA */}
-            <PWAInstallButton variant="header" />
+          <div className="flex items-center space-x-1 sm:space-x-2 shrink-0">
+            {/* Botão Instalar App no Celular / PWA (apenas em telas maiores que mobile para não poluir o topo no celular) */}
+            <div className="hidden sm:block">
+              <PWAInstallButton variant="header" />
+            </div>
 
             {/* Botão Banco de Dados */}
             {onOpenDatabaseModal && (
               <button
                 id="header-database-btn"
                 onClick={onOpenDatabaseModal}
-                className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-1.5 sm:py-2 bg-white/15 hover:bg-white/25 active:scale-95 text-xs font-bold rounded-xl shadow-xs transition border border-white/30 text-white cursor-pointer"
+                className="hidden sm:inline-flex items-center justify-center p-1.5 sm:px-2.5 sm:py-2 bg-white/15 hover:bg-white/25 active:scale-95 text-xs font-bold rounded-xl shadow-xs transition border border-white/30 text-white cursor-pointer"
                 title="Banco de Dados Local & Backup"
               >
-                <Database className="w-3.5 h-3.5 text-blue-300" />
-                <span className="hidden lg:inline text-[11px]">Banco</span>
+                <Database className="w-4 h-4 sm:w-3.5 sm:h-3.5 text-blue-300" />
+                <span className="hidden lg:inline text-[11px] ml-1">Banco</span>
               </button>
             )}
 
@@ -120,11 +122,11 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 id="header-key-generator-btn"
                 onClick={onOpenKeyGenerator}
-                className="inline-flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 sm:py-2 bg-amber-400 hover:bg-amber-300 active:scale-95 text-xs font-black rounded-xl shadow-xs transition text-slate-950 cursor-pointer border border-amber-300"
+                className="hidden sm:inline-flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 sm:py-2 bg-amber-400 hover:bg-amber-300 active:scale-95 text-xs font-black rounded-xl shadow-xs transition text-slate-950 cursor-pointer border border-amber-300"
                 title="Gerador de Chaves Válidas do Sistema (Painel do Proprietário)"
               >
                 <KeyRound className="w-3.5 h-3.5 text-slate-900" />
-                <span className="hidden sm:inline text-[11px] font-black">Gerador de Chaves</span>
+                <span className="hidden sm:inline text-[11px] font-black">Gerador</span>
               </button>
             )}
 
@@ -133,15 +135,15 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 id="header-license-btn"
                 onClick={onOpenLicenseModal}
-                className={`inline-flex items-center gap-1 px-2 sm:px-2.5 py-1.5 sm:py-2 active:scale-95 text-xs font-bold rounded-xl shadow-xs transition border cursor-pointer ${
+                className={`inline-flex items-center justify-center p-1.5 sm:px-2.5 sm:py-2 active:scale-95 text-xs font-bold rounded-xl shadow-xs transition border cursor-pointer ${
                   isLicenseActive
                     ? 'bg-emerald-950/50 hover:bg-emerald-900/60 border-emerald-400/50 text-emerald-200'
                     : 'bg-amber-500/30 hover:bg-amber-500/40 border-amber-300/60 text-amber-100 animate-pulse'
                 }`}
-                title={isLicenseActive ? 'Software Licenciado (3 Instalações)' : 'Ativar Licença do Produto'}
+                title={isLicenseActive ? 'Software Licenciado' : 'Ativar Licença do Produto'}
               >
-                <ShieldCheck className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline text-[11px] font-extrabold">
+                <ShieldCheck className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
+                <span className="hidden md:inline ml-1 text-[11px] font-extrabold">
                   {isLicenseActive ? 'Licenciado' : 'Ativar'}
                 </span>
               </button>
@@ -150,18 +152,17 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               id="header-add-driver-btn"
               onClick={onOpenDriverModal}
-              className="inline-flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 bg-white/20 hover:bg-white/30 active:scale-95 text-xs font-bold rounded-xl shadow-xs transition border-2 border-white/40 text-white cursor-pointer"
+              className="inline-flex items-center gap-1 px-2 py-1.5 sm:px-3 sm:py-2 bg-white/20 hover:bg-white/30 active:scale-95 text-xs font-bold rounded-xl shadow-xs transition border-2 border-white/40 text-white cursor-pointer"
               title="Cadastrar Novo Motorista"
             >
               <UserCheck className="w-4 h-4" />
-              <span className="hidden sm:inline">+ Motorista</span>
-              <span className="sm:hidden">+ Mot.</span>
+              <span className="text-[11px] sm:text-xs">+ Mot.</span>
             </button>
 
             <button
               id="header-settings-quick-btn"
               onClick={() => onChangeTab?.('settings')}
-              className={`p-2 rounded-xl transition cursor-pointer border-2 ${
+              className={`p-1.5 sm:p-2 rounded-xl transition cursor-pointer border-2 ${
                 activeTab === 'settings'
                   ? 'bg-white text-slate-900 border-white shadow-xs'
                   : 'bg-white/15 text-white border-white/40 hover:bg-white/30'

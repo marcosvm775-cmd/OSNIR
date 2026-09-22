@@ -60,7 +60,7 @@ echo.
 echo.
 
 set "JAVA_HOME=%JAVA_USAR%"
-set "PATH=%JAVA_USAR%\bin;%SystemRoot%\system32;%SystemRoot%"
+set "PATH=%JAVA_USAR%\bin;%PATH%"
 
 :: 2. Android SDK
 echo 2. Configurando o Android SDK e Licencas...
@@ -88,19 +88,35 @@ echo sdk.dir=%FORMATO_SDK%> "%~dp0android\local.properties"
 
 echo.
 echo 3. Compilando o APK (Isso leva de 1 a 2 minutos)...
-echo    Por favor aguarde enquanto o Gradle constroi o instalador...
-echo.
+echo    Aguarde enquanto o Gradle gera o pacote do aplicativo...
+echo -------------------------------------------------------------------------------
 
 cd /d "%~dp0android"
-call gradlew.bat clean assembleDebug --stacktrace > "%~dp0relatorio_erro_apk.txt" 2>&1
+call gradlew.bat assembleDebug assembleRelease --stacktrace > "%~dp0relatorio_erro_apk.txt" 2>&1
+set "GRADLE_STATUS=%ERRORLEVEL%"
 cd /d "%~dp0"
 
 echo.
+echo -------------------------------------------------------------------------------
+echo Codigo de retorno da compilacao: %GRADLE_STATUS%
+echo -------------------------------------------------------------------------------
+echo.
 set "DESTINO=%~dp0SEU_APK_AQUI"
 
+set "APK_ORIGEM="
 if exist "%~dp0android\app\build\outputs\apk\debug\app-debug.apk" (
+    set "APK_ORIGEM=%~dp0android\app\build\outputs\apk\debug\app-debug.apk"
+)
+if "%APK_ORIGEM%"=="" if exist "%~dp0android\app\build\outputs\apk\release\app-release.apk" (
+    set "APK_ORIGEM=%~dp0android\app\build\outputs\apk\release\app-release.apk"
+)
+if "%APK_ORIGEM%"=="" if exist "%~dp0android\app\build\outputs\apk\release\app-release-unsigned.apk" (
+    set "APK_ORIGEM=%~dp0android\app\build\outputs\apk\release\app-release-unsigned.apk"
+)
+
+if not "%APK_ORIGEM%"=="" (
     if not exist "%DESTINO%" mkdir "%DESTINO%"
-    copy /y "%~dp0android\app\build\outputs\apk\debug\app-debug.apk" "%DESTINO%\OSNIR_TURISMO.apk" >nul 2>&1
+    copy /y "%APK_ORIGEM%" "%DESTINO%\OSNIR_TURISMO.apk" >nul 2>&1
 
     color 0A
     echo ===============================================================================
@@ -120,11 +136,16 @@ if exist "%~dp0android\app\build\outputs\apk\debug\app-debug.apk" (
     echo             HOUVE UM DETALHE NA COMPILACAO DO APK
     echo ===============================================================================
     echo.
-    echo O relatorio detalhado do erro foi gerado em: relatorio_erro_apk.txt
-    echo Abrindo o bloco de notas agora...
-    echo.
+    echo Veja abaixo o erro que o sistema relatou:
+    echo -------------------------------------------------------------------------------
     if exist "%~dp0relatorio_erro_apk.txt" (
+        type "%~dp0relatorio_erro_apk.txt"
+        echo -------------------------------------------------------------------------------
+        echo.
+        echo Abrindo o relatorio completo no Bloco de Notas para facilitar...
         start "" notepad "%~dp0relatorio_erro_apk.txt"
+    ) else (
+        echo Nao foi possivel ler o relatorio.
     )
 )
 

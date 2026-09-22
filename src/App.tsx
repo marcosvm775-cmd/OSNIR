@@ -462,7 +462,7 @@ export default function App() {
   }, [drivers]);
 
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col font-sans text-slate-800 pb-20 md:pb-8 select-none">
+    <div className="min-h-screen bg-slate-100 flex flex-col font-sans text-slate-800 safe-bottom-space md:pb-8 select-none">
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed top-4 inset-x-0 z-50 flex justify-center pointer-events-none px-4">
@@ -497,7 +497,7 @@ export default function App() {
         {activeTab === 'passengers' && (
           <div className="space-y-3.5">
             {/* Quick action bar */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/90 shadow-2xs">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white p-3 sm:p-4 rounded-2xl border border-slate-200/90 shadow-2xs">
               <div>
                 <div className="flex items-center gap-2">
                   <h2 className="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight">
@@ -512,11 +512,11 @@ export default function App() {
                 </p>
               </div>
 
-              <div className="flex flex-wrap items-center gap-1.5 shrink-0">
+              <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-0.5 scrollbar-none shrink-0">
                 <button
                   id="btn-goto-daily-list"
                   onClick={() => setActiveTab('daily-list')}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold rounded-xl shadow-xs transition active:scale-95 cursor-pointer"
+                  className="inline-flex items-center gap-1 px-2.5 sm:px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold rounded-xl shadow-xs transition active:scale-95 cursor-pointer whitespace-nowrap"
                   title="Acessar a Lista do Dia"
                 >
                   <CalendarDays className="w-3.5 h-3.5 text-emerald-200" />
@@ -541,11 +541,11 @@ export default function App() {
                     generateGeneralPassengersListPdf(listToExport, drivers, filterNote, companyConfig);
                     showToast('PDF da Lista Geral gerado com sucesso!');
                   }}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-800 hover:bg-emerald-900 text-white text-xs font-semibold rounded-xl shadow-xs transition active:scale-95 cursor-pointer"
+                  className="inline-flex items-center gap-1 px-2.5 sm:px-3 py-1.5 bg-emerald-800 hover:bg-emerald-900 text-white text-xs font-semibold rounded-xl shadow-xs transition active:scale-95 cursor-pointer whitespace-nowrap"
                   title="Baixar PDF com a lista geral de passageiros cadastrados"
                 >
                   <FileDown className="w-3.5 h-3.5 text-emerald-200" />
-                  <span>Gerar PDF</span>
+                  <span>PDF</span>
                 </button>
 
                 <button
@@ -554,10 +554,10 @@ export default function App() {
                     setEditingPassenger(null);
                     setActiveTab('new-passenger');
                   }}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition active:scale-95 cursor-pointer"
+                  className="inline-flex items-center gap-1 px-3 sm:px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition active:scale-95 cursor-pointer whitespace-nowrap ml-auto sm:ml-0"
                 >
                   <PlusCircle className="w-4 h-4" />
-                  <span>+ Novo Cliente</span>
+                  <span>+ Novo</span>
                 </button>
               </div>
             </div>

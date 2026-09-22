@@ -10,6 +10,7 @@
   body {
     overscroll-behavior-y: none;
     text-transform: uppercase !important;
+    padding-top: env(safe-area-inset-top, 0px);
   }
 
   *, *::before, *::after {
@@ -23,6 +24,17 @@
   input::placeholder, textarea::placeholder {
     text-transform: uppercase !important;
   }
+}
+
+/* Utilitários para área segura de celulares modernos com entalhe / notch e barra de gestos */
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+.pb-safe {
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
+}
+.safe-bottom-space {
+  padding-bottom: calc(74px + env(safe-area-inset-bottom, 12px));
 }
 
 @media print {

@@ -1149,11 +1149,11 @@ export const TripClosingManager: React.FC<TripClosingManagerProps> = ({
 
       {/* MODAL: ADICIONAR / EDITAR DESPESA */}
       {isExpenseModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
-          <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl border-2 border-slate-300 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-3 sm:p-4">
+          <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl border-2 border-slate-300 overflow-hidden animate-in fade-in zoom-in-95 duration-200 max-h-[92vh] flex flex-col">
             {/* Modal Header */}
             <div
-              className="px-5 py-4 text-white flex items-center justify-between"
+              className="px-4 sm:px-5 py-3 sm:py-4 text-white flex items-center justify-between shrink-0"
               style={{ backgroundColor: primaryColor }}
             >
               <div className="flex items-center space-x-2">
@@ -1172,7 +1172,7 @@ export const TripClosingManager: React.FC<TripClosingManagerProps> = ({
             </div>
 
             {/* Modal Form */}
-            <form onSubmit={handleSaveExpense} className="p-5 space-y-4">
+            <form onSubmit={handleSaveExpense} className="p-4 sm:p-5 space-y-4 overflow-y-auto flex-1">
               {/* Trip Selection */}
               <div>
                 <label className="block text-xs font-bold text-slate-800 mb-1">

@@ -485,12 +485,12 @@ export const PricingManager: React.FC<PricingManagerProps> = ({
         </div>
 
         {/* SUB-TABS NAVIGATION: 4 DISTINCT AREAS */}
-        <div className="mt-5 pt-4 border-t-2 border-slate-100 grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <div className="mt-4 pt-3 sm:mt-5 sm:pt-4 border-t-2 border-slate-100 grid grid-cols-2 lg:grid-cols-4 gap-2">
           {/* Tab 1: Tarifas de Passagens */}
           <button
             type="button"
             onClick={() => setActiveSubTab('routes')}
-            className={`p-3 rounded-2xl border-2 transition cursor-pointer flex items-center gap-2.5 text-left ${
+            className={`p-2.5 sm:p-3 rounded-2xl border-2 transition cursor-pointer flex items-center gap-2 sm:gap-2.5 text-left ${
               activeSubTab === 'routes'
                 ? 'bg-emerald-50 border-emerald-500 shadow-2xs'
                 : 'bg-slate-50 border-slate-200 hover:bg-slate-100 text-slate-700'
@@ -502,11 +502,11 @@ export const PricingManager: React.FC<PricingManagerProps> = ({
               }`}
             />
             <div className="min-w-0">
-              <span className="text-xs font-black block truncate text-slate-900">
-                Tarifas por Trajeto
+              <span className="text-[11px] sm:text-xs font-black block truncate text-slate-900">
+                Tarifas Rotas
               </span>
-              <span className="text-[10px] text-slate-500 block truncate">
-                {configuredList.length} rotas cadastradas
+              <span className="text-[9px] sm:text-[10px] text-slate-500 block truncate">
+                {configuredList.length} cadastradas
               </span>
             </div>
           </button>
@@ -515,7 +515,7 @@ export const PricingManager: React.FC<PricingManagerProps> = ({
           <button
             type="button"
             onClick={() => setActiveSubTab('sellers')}
-            className={`p-3 rounded-2xl border-2 transition cursor-pointer flex items-center gap-2.5 text-left ${
+            className={`p-2.5 sm:p-3 rounded-2xl border-2 transition cursor-pointer flex items-center gap-2 sm:gap-2.5 text-left ${
               activeSubTab === 'sellers'
                 ? 'bg-emerald-50 border-emerald-500 shadow-2xs'
                 : 'bg-slate-50 border-slate-200 hover:bg-slate-100 text-slate-700'
@@ -527,11 +527,11 @@ export const PricingManager: React.FC<PricingManagerProps> = ({
               }`}
             />
             <div className="min-w-0">
-              <span className="text-xs font-black block truncate text-slate-900">
-                Comissão Vendedores
+              <span className="text-[11px] sm:text-xs font-black block truncate text-slate-900">
+                Vendedores
               </span>
-              <span className="text-[10px] text-slate-500 block truncate">
-                {allSellers.length} vendedor(es) • Padrão {financialConfig.defaultCommissionPercent}%
+              <span className="text-[9px] sm:text-[10px] text-slate-500 block truncate">
+                {allSellers.length} vendedor(es)
               </span>
             </div>
           </button>
@@ -540,7 +540,7 @@ export const PricingManager: React.FC<PricingManagerProps> = ({
           <button
             type="button"
             onClick={() => setActiveSubTab('drivers')}
-            className={`p-3 rounded-2xl border-2 transition cursor-pointer flex items-center gap-2.5 text-left ${
+            className={`p-2.5 sm:p-3 rounded-2xl border-2 transition cursor-pointer flex items-center gap-2.5 text-left ${
               activeSubTab === 'drivers'
                 ? 'bg-emerald-50 border-emerald-500 shadow-2xs'
                 : 'bg-slate-50 border-slate-200 hover:bg-slate-100 text-slate-700'
@@ -552,11 +552,11 @@ export const PricingManager: React.FC<PricingManagerProps> = ({
               }`}
             />
             <div className="min-w-0">
-              <span className="text-xs font-black block truncate text-slate-900">
-                Remuneração Motoristas
+              <span className="text-[11px] sm:text-xs font-black block truncate text-slate-900">
+                Motoristas
               </span>
-              <span className="text-[10px] text-slate-500 block truncate">
-                {drivers.length} motorista(s) • R$ {financialConfig.driverTripPrice}
+              <span className="text-[9px] sm:text-[10px] text-slate-500 block truncate">
+                {drivers.length} motorista(s)
               </span>
             </div>
           </button>
@@ -565,7 +565,7 @@ export const PricingManager: React.FC<PricingManagerProps> = ({
           <button
             type="button"
             onClick={() => setActiveSubTab('base')}
-            className={`p-3 rounded-2xl border-2 transition cursor-pointer flex items-center gap-2.5 text-left ${
+            className={`p-2.5 sm:p-3 rounded-2xl border-2 transition cursor-pointer flex items-center gap-2.5 text-left ${
               activeSubTab === 'base'
                 ? 'bg-emerald-50 border-emerald-500 shadow-2xs'
                 : 'bg-slate-50 border-slate-200 hover:bg-slate-100 text-slate-700'
@@ -577,11 +577,11 @@ export const PricingManager: React.FC<PricingManagerProps> = ({
               }`}
             />
             <div className="min-w-0">
-              <span className="text-xs font-black block truncate text-slate-900">
-                Valores Base Globais
+              <span className="text-[11px] sm:text-xs font-black block truncate text-slate-900">
+                Valores Base
               </span>
-              <span className="text-[10px] text-slate-500 block truncate">
-                Passagem padrão R$ {financialConfig.ticketPrice}
+              <span className="text-[9px] sm:text-[10px] text-slate-500 block truncate">
+                R$ {financialConfig.ticketPrice} padrão
               </span>
             </div>
           </button>
@@ -990,9 +990,9 @@ export const PricingManager: React.FC<PricingManagerProps> = ({
                       </div>
 
                       {/* Percentage Input + Preset Chips + Save Button */}
-                      <div className="flex flex-wrap items-center gap-2 shrink-0">
+                      <div className="flex flex-wrap items-center justify-between sm:justify-end gap-2 w-full sm:w-auto shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-200">
                         {/* Quick Presets */}
-                        <div className="flex items-center gap-1">
+                        <div className="flex flex-wrap items-center gap-1">
                           {[5, 8, 10, 12, 15].map((preset) => (
                             <button
                               key={preset}
@@ -1012,35 +1012,37 @@ export const PricingManager: React.FC<PricingManagerProps> = ({
                           ))}
                         </div>
 
-                        {/* Direct input */}
-                        <div className="relative w-24">
-                          <input
-                            type="number"
-                            min="0"
-                            max="100"
-                            step="0.5"
-                            value={inputVal}
-                            onChange={(e) =>
-                              setSellerInputs({ ...sellerInputs, [seller]: e.target.value })
-                            }
-                            className="w-full pl-2 pr-6 py-1.5 text-xs font-black text-center border-2 border-slate-300 rounded-xl focus:outline-none focus:border-emerald-600 bg-white"
-                          />
-                          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">
-                            %
-                          </span>
-                        </div>
+                        <div className="flex items-center gap-1.5 ml-auto sm:ml-0">
+                          {/* Direct input */}
+                          <div className="relative w-20 sm:w-24">
+                            <input
+                              type="number"
+                              min="0"
+                              max="100"
+                              step="0.5"
+                              value={inputVal}
+                              onChange={(e) =>
+                                setSellerInputs({ ...sellerInputs, [seller]: e.target.value })
+                              }
+                              className="w-full pl-2 pr-6 py-1.5 text-xs font-black text-center border-2 border-slate-300 rounded-xl focus:outline-none focus:border-emerald-600 bg-white"
+                            />
+                            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">
+                              %
+                            </span>
+                          </div>
 
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const parsed = parseFloat(inputVal);
-                            handleSaveSellerCommission(seller, parsed);
-                          }}
-                          className="px-3 py-1.5 text-xs font-bold text-white rounded-xl shadow-xs transition active:scale-95 cursor-pointer"
-                          style={{ backgroundColor: primaryColor }}
-                        >
-                          Salvar %
-                        </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const parsed = parseFloat(inputVal);
+                              handleSaveSellerCommission(seller, parsed);
+                            }}
+                            className="px-3 py-1.5 text-xs font-bold text-white rounded-xl shadow-xs transition active:scale-95 cursor-pointer whitespace-nowrap"
+                            style={{ backgroundColor: primaryColor }}
+                          >
+                            Salvar
+                          </button>
+                        </div>
                       </div>
                     </div>
                   );
@@ -1145,9 +1147,9 @@ export const PricingManager: React.FC<PricingManagerProps> = ({
                       </div>
 
                       {/* Controls: Type Toggle, Value Input, Presets, Save */}
-                      <div className="flex flex-wrap items-center gap-2 shrink-0">
+                      <div className="flex flex-wrap items-center justify-between lg:justify-end gap-2 w-full lg:w-auto shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-200">
                         {/* Type toggle */}
-                        <div className="flex items-center p-1 bg-white border-2 border-slate-300 rounded-xl">
+                        <div className="flex items-center p-0.5 sm:p-1 bg-white border-2 border-slate-300 rounded-xl">
                           <button
                             type="button"
                             onClick={() => {
@@ -1163,7 +1165,7 @@ export const PricingManager: React.FC<PricingManagerProps> = ({
                                 },
                               });
                             }}
-                            className={`px-2.5 py-1 text-[11px] font-bold rounded-lg transition cursor-pointer ${
+                            className={`px-2 sm:px-2.5 py-1 text-[10px] sm:text-[11px] font-bold rounded-lg transition cursor-pointer ${
                               inputState.type === 'fixed'
                                 ? 'bg-slate-900 text-white'
                                 : 'text-slate-600 hover:text-slate-900'
@@ -1186,7 +1188,7 @@ export const PricingManager: React.FC<PricingManagerProps> = ({
                                 },
                               });
                             }}
-                            className={`px-2.5 py-1 text-[11px] font-bold rounded-lg transition cursor-pointer ${
+                            className={`px-2 sm:px-2.5 py-1 text-[10px] sm:text-[11px] font-bold rounded-lg transition cursor-pointer ${
                               inputState.type === 'percent'
                                 ? 'bg-slate-900 text-white'
                                 : 'text-slate-600 hover:text-slate-900'
@@ -1197,7 +1199,7 @@ export const PricingManager: React.FC<PricingManagerProps> = ({
                         </div>
 
                         {/* Quick Presets */}
-                        <div className="flex items-center gap-1">
+                        <div className="flex flex-wrap items-center gap-1">
                           {inputState.type === 'fixed'
                             ? [250, 300, 350, 400, 500].map((preset) => (
                                 <button
@@ -1210,7 +1212,7 @@ export const PricingManager: React.FC<PricingManagerProps> = ({
                                     });
                                     handleSaveDriverRate(drv.id, drv.fullName, 'fixed', preset);
                                   }}
-                                  className={`px-2 py-1 rounded-lg text-[10px] font-bold border transition cursor-pointer ${
+                                  className={`px-1.5 sm:px-2 py-1 rounded-lg text-[10px] font-bold border transition cursor-pointer ${
                                     currentType === 'fixed' && currentValue === preset
                                       ? 'bg-blue-700 text-white border-blue-800'
                                       : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-100'
@@ -1230,7 +1232,7 @@ export const PricingManager: React.FC<PricingManagerProps> = ({
                                     });
                                     handleSaveDriverRate(drv.id, drv.fullName, 'percent', preset);
                                   }}
-                                  className={`px-2 py-1 rounded-lg text-[10px] font-bold border transition cursor-pointer ${
+                                  className={`px-1.5 sm:px-2 py-1 rounded-lg text-[10px] font-bold border transition cursor-pointer ${
                                     currentType === 'percent' && currentValue === preset
                                       ? 'bg-blue-700 text-white border-blue-800'
                                       : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-100'
@@ -1241,41 +1243,43 @@ export const PricingManager: React.FC<PricingManagerProps> = ({
                               ))}
                         </div>
 
-                        {/* Value Input */}
-                        <div className="relative w-28">
-                          <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">
-                            {inputState.type === 'fixed' ? 'R$' : '%'}
-                          </span>
-                          <input
-                            type="number"
-                            min="0"
-                            step={inputState.type === 'fixed' ? '10' : '0.5'}
-                            value={inputState.value}
-                            onChange={(e) =>
-                              setDriverInputs({
-                                ...driverInputs,
-                                [drv.id]: {
-                                  type: inputState.type,
-                                  value: e.target.value,
-                                },
-                              })
-                            }
-                            className="w-full pl-7 pr-2 py-1.5 text-xs font-black text-center border-2 border-slate-300 rounded-xl focus:outline-none focus:border-emerald-600 bg-white"
-                          />
-                        </div>
+                        <div className="flex items-center gap-1.5 ml-auto lg:ml-0">
+                          {/* Value Input */}
+                          <div className="relative w-22 sm:w-28">
+                            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">
+                              {inputState.type === 'fixed' ? 'R$' : '%'}
+                            </span>
+                            <input
+                              type="number"
+                              min="0"
+                              step={inputState.type === 'fixed' ? '10' : '0.5'}
+                              value={inputState.value}
+                              onChange={(e) =>
+                                setDriverInputs({
+                                  ...driverInputs,
+                                  [drv.id]: {
+                                    type: inputState.type,
+                                    value: e.target.value,
+                                  },
+                                })
+                              }
+                              className="w-full pl-6 sm:pl-7 pr-2 py-1.5 text-xs font-black text-center border-2 border-slate-300 rounded-xl focus:outline-none focus:border-emerald-600 bg-white"
+                            />
+                          </div>
 
-                        {/* Save Button */}
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const parsed = parseFloat(inputState.value);
-                            handleSaveDriverRate(drv.id, drv.fullName, inputState.type, parsed);
-                          }}
-                          className="px-3 py-1.5 text-xs font-bold text-white rounded-xl shadow-xs transition active:scale-95 cursor-pointer"
-                          style={{ backgroundColor: primaryColor }}
-                        >
-                          Salvar
-                        </button>
+                          {/* Save Button */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const parsed = parseFloat(inputState.value);
+                              handleSaveDriverRate(drv.id, drv.fullName, inputState.type, parsed);
+                            }}
+                            className="px-3 py-1.5 text-xs font-bold text-white rounded-xl shadow-xs transition active:scale-95 cursor-pointer whitespace-nowrap"
+                            style={{ backgroundColor: primaryColor }}
+                          >
+                            Salvar
+                          </button>
+                        </div>
                       </div>
                     </div>
                   );

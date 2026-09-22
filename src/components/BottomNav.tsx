@@ -30,12 +30,12 @@ export const BottomNav: React.FC<BottomNavProps> = ({
       aria-label="Navegação Principal"
       className="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t-2 border-slate-200 z-40 shadow-xl pb-safe md:hidden"
     >
-      <div className="max-w-xl mx-auto grid grid-cols-8 h-16 px-1 py-1 gap-0.5">
+      <div className="max-w-xl mx-auto flex items-center justify-between overflow-x-auto scrollbar-none px-1.5 py-1 gap-1">
         {/* Tab 1: Clientes (Lista Geral) */}
         <button
           id="nav-tab-passengers"
           onClick={() => onChangeTab('passengers')}
-          className={`flex flex-col items-center justify-center relative transition-all cursor-pointer rounded-xl border ${
+          className={`flex-1 min-w-[50px] py-1 flex flex-col items-center justify-center relative transition-all cursor-pointer rounded-xl border ${
             activeTab === 'passengers' || activeTab === 'new-passenger'
               ? 'bg-slate-100/90 border-slate-300 font-extrabold shadow-2xs'
               : 'border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-50'
@@ -53,7 +53,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
               </span>
             )}
           </div>
-          <span className="text-[9px] mt-0.5 truncate font-semibold">Clientes</span>
+          <span className="text-[9px] mt-0.5 whitespace-nowrap font-semibold">Clientes</span>
           {(activeTab === 'passengers' || activeTab === 'new-passenger') && (
             <span
               className="absolute bottom-0.5 w-4 h-0.5 rounded-full"
@@ -66,7 +66,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
         <button
           id="nav-tab-daily-list"
           onClick={() => onChangeTab('daily-list')}
-          className={`flex flex-col items-center justify-center relative transition-all cursor-pointer rounded-xl border ${
+          className={`flex-1 min-w-[50px] py-1 flex flex-col items-center justify-center relative transition-all cursor-pointer rounded-xl border ${
             activeTab === 'daily-list'
               ? 'bg-slate-100/90 border-slate-300 font-extrabold shadow-2xs'
               : 'border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-50'
@@ -84,7 +84,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
               </span>
             )}
           </div>
-          <span className="text-[9px] mt-0.5 truncate font-semibold">Dia</span>
+          <span className="text-[9px] mt-0.5 whitespace-nowrap font-semibold">Dia</span>
           {activeTab === 'daily-list' && (
             <span
               className="absolute bottom-0.5 w-4 h-0.5 rounded-full"
@@ -97,7 +97,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
         <button
           id="nav-tab-trips"
           onClick={() => onChangeTab('trips')}
-          className={`flex flex-col items-center justify-center relative transition-all cursor-pointer rounded-xl border ${
+          className={`flex-1 min-w-[50px] py-1 flex flex-col items-center justify-center relative transition-all cursor-pointer rounded-xl border ${
             activeTab === 'trips'
               ? 'bg-slate-100/90 border-slate-300 font-extrabold shadow-2xs'
               : 'border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-50'
@@ -115,7 +115,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
               </span>
             )}
           </div>
-          <span className="text-[9px] mt-0.5 truncate font-semibold">Viagem</span>
+          <span className="text-[9px] mt-0.5 whitespace-nowrap font-semibold">Viagem</span>
           {activeTab === 'trips' && (
             <span
               className="absolute bottom-0.5 w-4 h-0.5 rounded-full"
@@ -124,11 +124,11 @@ export const BottomNav: React.FC<BottomNavProps> = ({
           )}
         </button>
 
-        {/* Tab 4: Fechamento das Viagens (NOVO) */}
+        {/* Tab 4: Fechamento das Viagens */}
         <button
           id="nav-tab-closing"
           onClick={() => onChangeTab('closing')}
-          className={`flex flex-col items-center justify-center relative transition-all cursor-pointer rounded-xl border ${
+          className={`flex-1 min-w-[50px] py-1 flex flex-col items-center justify-center relative transition-all cursor-pointer rounded-xl border ${
             activeTab === 'closing'
               ? 'bg-slate-100/90 border-slate-300 font-extrabold shadow-2xs'
               : 'border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-50'
@@ -139,7 +139,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
           <div className="relative">
             <Receipt className="w-4 h-4" />
           </div>
-          <span className="text-[9px] mt-0.5 truncate font-semibold">Fechamento</span>
+          <span className="text-[9px] mt-0.5 whitespace-nowrap font-semibold">Fecham.</span>
           {activeTab === 'closing' && (
             <span
               className="absolute bottom-0.5 w-4 h-0.5 rounded-full"
@@ -152,7 +152,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
         <button
           id="nav-tab-pricing"
           onClick={() => onChangeTab('pricing')}
-          className={`flex flex-col items-center justify-center relative transition-all cursor-pointer rounded-xl border ${
+          className={`flex-1 min-w-[50px] py-1 flex flex-col items-center justify-center relative transition-all cursor-pointer rounded-xl border ${
             activeTab === 'pricing'
               ? 'bg-slate-100/90 border-slate-300 font-extrabold shadow-2xs'
               : 'border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-50'
@@ -163,7 +163,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
           <div className="relative">
             <DollarSign className="w-4 h-4" />
           </div>
-          <span className="text-[9px] mt-0.5 truncate font-semibold">Valores</span>
+          <span className="text-[9px] mt-0.5 whitespace-nowrap font-semibold">Valores</span>
           {activeTab === 'pricing' && (
             <span
               className="absolute bottom-0.5 w-4 h-0.5 rounded-full"
@@ -176,7 +176,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
         <button
           id="nav-tab-drivers"
           onClick={() => onChangeTab('drivers')}
-          className={`flex flex-col items-center justify-center relative transition-all cursor-pointer rounded-xl border ${
+          className={`flex-1 min-w-[50px] py-1 flex flex-col items-center justify-center relative transition-all cursor-pointer rounded-xl border ${
             activeTab === 'drivers'
               ? 'bg-slate-100/90 border-slate-300 font-extrabold shadow-2xs'
               : 'border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-50'
@@ -191,7 +191,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
               </span>
             )}
           </div>
-          <span className="text-[9px] mt-0.5 truncate">Motoristas</span>
+          <span className="text-[9px] mt-0.5 whitespace-nowrap">Motoristas</span>
           {activeTab === 'drivers' && (
             <span
               className="absolute bottom-0.5 w-4 h-0.5 rounded-full"
@@ -200,11 +200,11 @@ export const BottomNav: React.FC<BottomNavProps> = ({
           )}
         </button>
 
-        {/* Tab 6: Relatórios */}
+        {/* Tab 7: Relatórios */}
         <button
           id="nav-tab-reports"
           onClick={() => onChangeTab('reports')}
-          className={`flex flex-col items-center justify-center relative transition-all cursor-pointer rounded-xl border ${
+          className={`flex-1 min-w-[50px] py-1 flex flex-col items-center justify-center relative transition-all cursor-pointer rounded-xl border ${
             activeTab === 'reports'
               ? 'bg-slate-100/90 border-slate-300 font-extrabold shadow-2xs'
               : 'border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-50'
@@ -214,7 +214,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
           <div className="relative">
             <BarChart3 className="w-4 h-4" />
           </div>
-          <span className="text-[9px] mt-0.5 truncate">Relat.</span>
+          <span className="text-[9px] mt-0.5 whitespace-nowrap">Relat.</span>
           {activeTab === 'reports' && (
             <span
               className="absolute bottom-0.5 w-4 h-0.5 rounded-full"
@@ -223,11 +223,11 @@ export const BottomNav: React.FC<BottomNavProps> = ({
           )}
         </button>
 
-        {/* Tab 7: Configuração (SOLICITADA PELO USUÁRIO) */}
+        {/* Tab 8: Configuração */}
         <button
           id="nav-tab-settings"
           onClick={() => onChangeTab('settings')}
-          className={`flex flex-col items-center justify-center relative transition-all cursor-pointer rounded-xl border ${
+          className={`flex-1 min-w-[50px] py-1 flex flex-col items-center justify-center relative transition-all cursor-pointer rounded-xl border ${
             activeTab === 'settings'
               ? 'bg-slate-100/90 border-slate-300 font-extrabold shadow-2xs'
               : 'border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-50'
@@ -238,7 +238,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
           <div className="relative">
             <Sliders className="w-4 h-4" />
           </div>
-          <span className="text-[9px] mt-0.5 truncate font-semibold">Config.</span>
+          <span className="text-[9px] mt-0.5 whitespace-nowrap font-semibold">Config.</span>
           {activeTab === 'settings' && (
             <span
               className="absolute bottom-0.5 w-4 h-0.5 rounded-full"
