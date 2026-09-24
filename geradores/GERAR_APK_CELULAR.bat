@@ -88,7 +88,13 @@ set "FORMATO_SDK=%LOCAL_SDK:\=/%"
 echo sdk.dir=%FORMATO_SDK%> "%RAIZ%\android\local.properties"
 
 echo.
-echo 3. Verificando arquivos do aplicativo...
+echo 3. Compilando os arquivos do aplicativo (versao limpa sem gerador de chaves)...
+call npm run build
+if %errorlevel% neq 0 (
+    echo [INFO] Tentando compilacao direta com Vite...
+    call npx vite build
+)
+
 if not exist "%RAIZ%\android\app\src\main\res\values\colors.xml" (
     (
         echo ^<?xml version="1.0" encoding="utf-8"?^>
@@ -110,10 +116,15 @@ if not exist "%RAIZ%\android\app\src\main\res\values\colors.xml" (
     echo ^}
 ) > "%RAIZ%\android\capacitor.settings.gradle"
 
+if not exist "%RAIZ%\android\app\src\main\assets\public" mkdir "%RAIZ%\android\app\src\main\assets\public"
+if exist "%RAIZ%\android\app\src\main\assets\public\assets" rd /s /q "%RAIZ%\android\app\src\main\assets\public\assets" >nul 2>&1
+del /q /f "%RAIZ%\android\app\src\main\assets\public\*.*" >nul 2>&1
+
 if exist "%RAIZ%\dist\index.html" (
     xcopy /e /y /q "%RAIZ%\dist\*" "%RAIZ%\android\app\src\main\assets\public\" >nul 2>&1
+    if exist "%RAIZ%\android\app\src\main\assets\public\webintoapp_pacote.zip" del /f /q "%RAIZ%\android\app\src\main\assets\public\webintoapp_pacote.zip" >nul 2>&1
 )
-echo [OK] Recursos do aplicativo prontos com a versao mais recente!
+echo [OK] Recursos do aplicativo sincronizados com a versao 100%% limpa (sem gerador)!
 
 echo.
 echo 4. Compilando o APK (Isso leva de 1 a 2 minutos)...

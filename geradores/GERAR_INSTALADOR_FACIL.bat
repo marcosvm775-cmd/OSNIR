@@ -14,14 +14,14 @@ echo Este utilitario cria o instalador executavel oficial (.exe) para o seu PC
 echo ou para distribuir e vender aos seus clientes!
 echo.
 
-:: 1. Verificar se a pasta dist existe
-echo 1. Verificando os arquivos do sistema...
-if not exist "%RAIZ%\dist\index.html" (
-    echo [INFO] Compilando arquivos do sistema com o Vite...
+:: 1. Compilar versao mais recente limpa (sem gerador de chaves)
+echo 1. Compilando arquivos do sistema (versao mais recente sem gerador)...
+call npm run build
+if %errorlevel% neq 0 (
+    echo [INFO] Tentando compilacao direta com Vite...
     call npx vite build
-) else (
-    echo [OK] Arquivos compilados do sistema ja estao prontos com a versao mais recente!
 )
+echo [OK] Arquivos compilados do sistema prontos e atualizados!
 
 :: 2. Garantir que o Electron esteja disponivel
 echo.
