@@ -86,15 +86,13 @@ export default function App() {
 
   // License & Database Modal States
   const [isLicenseModalOpen, setIsLicenseModalOpen] = useState(false);
-  const [isLicenseModalDirectToGenerator, setIsLicenseModalDirectToGenerator] = useState(false);
   const [isDatabaseModalOpen, setIsDatabaseModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isPhoneSimulatorOpen, setIsPhoneSimulatorOpen] = useState(false);
   const [isLicenseActive, setIsLicenseActive] = useState<boolean>(() => isProductActivated());
   const [trialInfo, setTrialInfo] = useState(() => getTrialStatus());
 
-  const handleOpenLicenseModal = (directToGenerator: boolean = false) => {
-    setIsLicenseModalDirectToGenerator(directToGenerator);
+  const handleOpenLicenseModal = () => {
     setIsLicenseModalOpen(true);
   };
 
@@ -506,9 +504,8 @@ export default function App() {
         onOpenDriverModal={() => setIsDriverModalOpen(true)}
         onResetData={() => setActiveTab('settings')}
         companyConfig={companyConfig}
-        onOpenLicenseModal={() => handleOpenLicenseModal(false)}
+        onOpenLicenseModal={handleOpenLicenseModal}
         onOpenDatabaseModal={() => setIsDatabaseModalOpen(true)}
-        onOpenKeyGenerator={() => handleOpenLicenseModal(true)}
         onOpenPhoneSimulator={() => setIsPhoneSimulatorOpen(true)}
         onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
         isLicenseActive={isLicenseActive}
@@ -987,7 +984,6 @@ export default function App() {
           setIsLicenseActive(!!lic);
           setTrialInfo(getTrialStatus());
         }}
-        initialShowGenerator={isLicenseModalDirectToGenerator}
       />
 
       {/* Trava Automática de Demonstração (Após 10 dias só funciona com Chave de Ativação) */}
@@ -1032,8 +1028,7 @@ export default function App() {
         companyConfig={companyConfig}
         onOpenDriverModal={() => setIsDriverModalOpen(true)}
         onOpenDatabaseModal={() => setIsDatabaseModalOpen(true)}
-        onOpenLicenseModal={() => handleOpenLicenseModal(false)}
-        onOpenKeyGenerator={() => handleOpenLicenseModal(true)}
+        onOpenLicenseModal={handleOpenLicenseModal}
         onOpenPhoneSimulator={() => setIsPhoneSimulatorOpen(true)}
         isLicenseActive={isLicenseActive}
         trialDaysRemaining={trialInfo.daysRemaining}

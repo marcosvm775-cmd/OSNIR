@@ -34,7 +34,6 @@ interface MobileSideMenuProps {
   onOpenDriverModal?: () => void;
   onOpenDatabaseModal?: () => void;
   onOpenLicenseModal?: () => void;
-  onOpenKeyGenerator?: () => void;
   onOpenPhoneSimulator?: () => void;
   isLicenseActive?: boolean;
   trialDaysRemaining?: number;
@@ -54,7 +53,6 @@ export const MobileSideMenu: React.FC<MobileSideMenuProps> = ({
   onOpenDriverModal,
   onOpenDatabaseModal,
   onOpenLicenseModal,
-  onOpenKeyGenerator,
   onOpenPhoneSimulator,
   isLicenseActive = false,
   trialDaysRemaining = 10,
@@ -336,20 +334,6 @@ export const MobileSideMenu: React.FC<MobileSideMenuProps> = ({
                 <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40">
                   {isLicenseActive ? 'Ativo' : `${trialDaysRemaining}d teste`}
                 </span>
-              </button>
-            )}
-
-            {onOpenKeyGenerator && (
-              <button
-                type="button"
-                onClick={() => {
-                  onOpenKeyGenerator();
-                  onClose();
-                }}
-                className="w-full flex items-center space-x-3 p-2.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 font-bold text-xs transition cursor-pointer border border-amber-500/30 active:scale-98"
-              >
-                <KeyRound className="w-4 h-4 text-amber-400" />
-                <span>Gerador de Chaves (Proprietário)</span>
               </button>
             )}
 

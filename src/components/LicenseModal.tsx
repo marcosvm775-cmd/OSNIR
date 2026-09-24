@@ -27,20 +27,17 @@ import {
   getLicenseExpiryDetails,
 } from '../utils/license';
 import { ProductLicense } from '../types';
-import { AdminLicenseGenerator } from './AdminLicenseGenerator';
 
 interface LicenseModalProps {
   isOpen: boolean;
   onClose: () => void;
   onLicenseUpdated?: (license: ProductLicense | null) => void;
-  initialShowGenerator?: boolean;
 }
 
 export const LicenseModal: React.FC<LicenseModalProps> = ({
   isOpen,
   onClose,
   onLicenseUpdated,
-  initialShowGenerator = false,
 }) => {
   const [activeLicense, setActiveLicense] = useState<ProductLicense | null>(null);
   const [machineId, setMachineId] = useState<string>('');
@@ -50,10 +47,6 @@ export const LicenseModal: React.FC<LicenseModalProps> = ({
   const [machineLabel, setMachineLabel] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [successMessage, setSuccessMessage] = useState<string>('');
-  const [showAdminPinPrompt, setShowAdminPinPrompt] = useState<boolean>(false);
-  const [adminPin, setAdminPin] = useState<string>('');
-  const [isAdminUnlocked, setIsAdminUnlocked] = useState<boolean>(false);
-  const [adminClickCount, setAdminClickCount] = useState<number>(0);
   const [copiedId, setCopiedId] = useState<boolean>(false);
   const [isRenewing, setIsRenewing] = useState<boolean>(false);
 
@@ -67,8 +60,6 @@ export const LicenseModal: React.FC<LicenseModalProps> = ({
       setMachineId(hwid);
       setErrorMessage('');
       setSuccessMessage('');
-      setIsAdminUnlocked(false);
-      setShowAdminPinPrompt(false);
       setIsRenewing(false);
       if (lic) {
         setClientName(lic.licenseeName);
@@ -76,7 +67,7 @@ export const LicenseModal: React.FC<LicenseModalProps> = ({
         setSlotNumber(lic.currentSlot);
       }
     }
-  }, [isOpen, initialShowGenerator]);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -86,26 +77,6 @@ export const LicenseModal: React.FC<LicenseModalProps> = ({
     navigator.clipboard.writeText(machineId);
     setCopiedId(true);
     setTimeout(() => setCopiedId(false), 2500);
-  };
-
-  const handleShieldHeaderClick = () => {
-    const next = adminClickCount + 1;
-    setAdminClickCount(next);
-    if (next >= 5) {
-      setShowAdminPinPrompt(true);
-      setAdminClickCount(0);
-    }
-  };
-
-  const handleUnlockAdmin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (adminPin === 'osnir2026' || adminPin === 'admin2026') {
-      setIsAdminUnlocked(true);
-      setShowAdminPinPrompt(false);
-      setAdminPin('');
-    } else {
-      alert('Senha mestra incorreta.');
-    }
   };
 
   const handleActivate = () => {
@@ -150,12 +121,6 @@ export const LicenseModal: React.FC<LicenseModalProps> = ({
     }
   };
 
-  const handleApplyGeneratedKey = (key: string, name: string) => {
-    setInputKey(key);
-    setClientName(name);
-    setIsAdminUnlocked(false);
-  };
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in overflow-y-auto">
       <div className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl border border-slate-200 overflow-hidden my-6">
@@ -163,9 +128,8 @@ export const LicenseModal: React.FC<LicenseModalProps> = ({
         <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white p-5 flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div
-              onClick={handleShieldHeaderClick}
               title="OSNIR TURISMO"
-              className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-400/30 flex items-center justify-center text-amber-400 cursor-default select-none active:scale-95 transition"
+              className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-400/30 flex items-center justify-center text-amber-400 cursor-default select-none transition"
             >
               <ShieldCheck className="w-6 h-6" />
             </div>
@@ -433,54 +397,6 @@ export const LicenseModal: React.FC<LicenseModalProps> = ({
                 <ShieldCheck className="w-5 h-5" />
                 <span>{isRenewing ? 'SALVAR E APLICAR RENOVAÇÃO' : 'ATIVAR PRODUTO NESTE COMPUTADOR'}</span>
               </button>
-            </div>
-          )}
-
-          {/* Prompt de Senha do Administrador (apenas se clicar 5x no ícone do escudo) */}
-          {showAdminPinPrompt && (
-            <form onSubmit={handleUnlockAdmin} className="p-3 bg-slate-900 text-white rounded-xl space-y-2 border border-slate-700">
-              <div className="text-xs font-bold text-amber-400 flex items-center justify-between">
-                <span>Painel Técnico do Desenvolvedor</span>
-                <button
-                  type="button"
-                  onClick={() => setShowAdminPinPrompt(false)}
-                  className="text-slate-400 hover:text-white text-xs"
-                >
-                  ✕
-                </button>
-              </div>
-              <div className="flex gap-2">
-                <input
-                  type="password"
-                  value={adminPin}
-                  onChange={(e) => setAdminPin(e.target.value)}
-                  placeholder="PIN Mestre"
-                  className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white"
-                  autoFocus
-                />
-                <button
-                  type="submit"
-                  className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs rounded-lg cursor-pointer"
-                >
-                  Entrar
-                </button>
-              </div>
-            </form>
-          )}
-
-          {isAdminUnlocked && (
-            <div className="mt-3 p-3 bg-slate-900 rounded-2xl border border-amber-500/40">
-              <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-800">
-                <span className="text-xs font-bold text-amber-400">Modo de Manutenção do Dono</span>
-                <button
-                  type="button"
-                  onClick={() => setIsAdminUnlocked(false)}
-                  className="text-slate-400 hover:text-white text-xs"
-                >
-                  Fechar
-                </button>
-              </div>
-              <AdminLicenseGenerator onApplyKey={handleApplyGeneratedKey} />
             </div>
           )}
         </div>

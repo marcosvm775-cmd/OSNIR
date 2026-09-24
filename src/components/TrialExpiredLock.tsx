@@ -14,7 +14,6 @@ import {
 } from 'lucide-react';
 import { getMachineFingerprint, validateProductKey, activateProduct, getStoredLicense, getLicenseExpiryDetails } from '../utils/license';
 import { ProductLicense } from '../types';
-import { AdminLicenseGenerator } from './AdminLicenseGenerator';
 
 interface TrialExpiredLockProps {
   onLicenseActivated: (license: ProductLicense) => void;
@@ -34,10 +33,6 @@ export const TrialExpiredLock: React.FC<TrialExpiredLockProps> = ({
   const [machineLabel, setMachineLabel] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [copiedHwid, setCopiedHwid] = useState(false);
-  const [adminClickCount, setAdminClickCount] = useState(0);
-  const [showAdminPinPrompt, setShowAdminPinPrompt] = useState(false);
-  const [adminPin, setAdminPin] = useState('');
-  const [isAdminUnlocked, setIsAdminUnlocked] = useState(false);
 
   // Verifica se o usuário tinha uma licença que expirou
   const rawLicense = (() => {
@@ -55,26 +50,6 @@ export const TrialExpiredLock: React.FC<TrialExpiredLockProps> = ({
     navigator.clipboard.writeText(machineId);
     setCopiedHwid(true);
     setTimeout(() => setCopiedHwid(false), 2000);
-  };
-
-  const handleCadeadoClick = () => {
-    const nextCount = adminClickCount + 1;
-    setAdminClickCount(nextCount);
-    if (nextCount >= 5) {
-      setShowAdminPinPrompt(true);
-      setAdminClickCount(0);
-    }
-  };
-
-  const handleUnlockAdmin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (adminPin === 'osnir2026' || adminPin === 'admin2026') {
-      setIsAdminUnlocked(true);
-      setShowAdminPinPrompt(false);
-      setAdminPin('');
-    } else {
-      alert('Senha mestra de administrador incorreta.');
-    }
   };
 
   const handleActivate = (e: React.FormEvent) => {
@@ -106,12 +81,6 @@ export const TrialExpiredLock: React.FC<TrialExpiredLockProps> = ({
     }
   };
 
-  const handleApplyFromAdmin = (key: string, name: string) => {
-    setProductKey(key);
-    if (name) setLicenseeName(name);
-    setIsAdminUnlocked(false);
-  };
-
   // Limpa caracteres do telefone para link do WhatsApp
   const rawDigits = (supportPhone || '').replace(/\D/g, '');
   const cleanPhone = rawDigits.length >= 10 ? rawDigits : '37991243101';
@@ -126,9 +95,8 @@ export const TrialExpiredLock: React.FC<TrialExpiredLockProps> = ({
         <div className="bg-gradient-to-r from-rose-700 via-rose-600 to-red-800 text-white p-5 sm:p-6 text-center relative overflow-hidden">
           <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full blur-xl pointer-events-none" />
           <div
-            onClick={handleCadeadoClick}
             title="OSNIR TURISMO"
-            className="w-16 h-16 bg-white/15 border-2 border-white/40 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-md cursor-default select-none active:scale-95 transition"
+            className="w-16 h-16 bg-white/15 border-2 border-white/40 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-md cursor-default select-none transition"
           >
             <Lock className="w-9 h-9 text-white animate-bounce" />
           </div>
@@ -264,54 +232,6 @@ export const TrialExpiredLock: React.FC<TrialExpiredLockProps> = ({
               </a>
             </div>
           </div>
-
-          {/* Secret Master PIN Prompt (Aparece somente após 5 cliques secretos no cadeado) */}
-          {showAdminPinPrompt && (
-            <form onSubmit={handleUnlockAdmin} className="p-3 bg-slate-900 text-white rounded-xl space-y-2 border border-slate-700">
-              <div className="text-xs font-bold text-amber-400 flex items-center justify-between">
-                <span>Painel Técnico do Desenvolvedor</span>
-                <button
-                  type="button"
-                  onClick={() => setShowAdminPinPrompt(false)}
-                  className="text-slate-400 hover:text-white text-xs"
-                >
-                  ✕
-                </button>
-              </div>
-              <div className="flex gap-2">
-                <input
-                  type="password"
-                  value={adminPin}
-                  onChange={(e) => setAdminPin(e.target.value)}
-                  placeholder="PIN Mestre de Administrador"
-                  className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white"
-                  autoFocus
-                />
-                <button
-                  type="submit"
-                  className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs rounded-lg cursor-pointer"
-                >
-                  Entrar
-                </button>
-              </div>
-            </form>
-          )}
-
-          {isAdminUnlocked && (
-            <div className="mt-3 p-3 bg-slate-900 rounded-2xl border border-amber-500/40">
-              <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-800">
-                <span className="text-xs font-bold text-amber-400">Modo de Manutenção do Dono</span>
-                <button
-                  type="button"
-                  onClick={() => setIsAdminUnlocked(false)}
-                  className="text-slate-400 hover:text-white text-xs"
-                >
-                  Fechar
-                </button>
-              </div>
-              <AdminLicenseGenerator onApplyKey={handleApplyFromAdmin} />
-            </div>
-          )}
         </div>
       </div>
     </div>

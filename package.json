@@ -33,6 +33,7 @@
       "!node_modules/**/*",
       "!dist-electron/**/*",
       "!src/**/*",
+      "!geradores/**/*",
       "!*.bat",
       "!*.md"
     ],
