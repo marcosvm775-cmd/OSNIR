@@ -1,6 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
-pushd "%~dp0"
+pushd "%~dp0.."
+set "RAIZ=%CD%"
 title GERADOR OFICIAL DO INSTALADOR WINDOWS (.EXE) - OSNIR TURISMO
 color 0B
 cls
@@ -15,17 +16,17 @@ echo.
 
 :: 1. Verificar se a pasta dist existe
 echo 1. Verificando os arquivos do sistema...
-if not exist "%~dp0dist\index.html" (
+if not exist "%RAIZ%\dist\index.html" (
     echo [INFO] Compilando arquivos do sistema com o Vite...
     call npx vite build
 ) else (
-    echo [OK] Arquivos compilados do sistema ja estao prontos na pasta dist!
+    echo [OK] Arquivos compilados do sistema ja estao prontos com a versao mais recente!
 )
 
 :: 2. Garantir que o Electron esteja disponivel
 echo.
 echo 2. Verificando dependencias do Electron...
-if not exist "%~dp0node_modules\electron" (
+if not exist "%RAIZ%\node_modules\electron" (
     echo [INFO] Instalando pacote do Electron... Aguarde alguns instantes...
     call npm install electron@34.0.0 --save-dev --no-audit --no-fund
 ) else (
@@ -37,7 +38,7 @@ echo 3. Empacotando com o Electron Builder e salvando o log...
 echo    Aguarde cerca de 1 a 2 minutos...
 echo.
 
-call npx electron-builder --win nsis > "%~dp0relatorio_erro_electron.txt" 2>&1
+call npx electron-builder --win nsis > "%RAIZ%\relatorio_erro_electron.txt" 2>&1
 
 if %errorlevel% neq 0 (
     color 0C
@@ -48,8 +49,8 @@ if %errorlevel% neq 0 (
     echo.
     echo Abrindo relatorio_erro_electron.txt no Bloco de Notas para voce ver o motivo real...
     echo.
-    if exist "%~dp0relatorio_erro_electron.txt" (
-        start "" notepad "%~dp0relatorio_erro_electron.txt"
+    if exist "%RAIZ%\relatorio_erro_electron.txt" (
+        start "" notepad "%RAIZ%\relatorio_erro_electron.txt"
     )
     pause
     exit /b 1
@@ -57,11 +58,11 @@ if %errorlevel% neq 0 (
 
 echo.
 echo 4. Organizando o instalador final...
-set "PASTA_FINAL=%~dp0INSTALADOR_FINAL_PARA_O_CLIENTE"
+set "PASTA_FINAL=%RAIZ%\INSTALADOR_FINAL_PARA_O_CLIENTE"
 if not exist "%PASTA_FINAL%" mkdir "%PASTA_FINAL%"
 
 set "ACHOU_EXE=0"
-for %%f in ("%~dp0dist-electron\*.exe") do (
+for %%f in ("%RAIZ%\dist-electron\*.exe") do (
     copy /y "%%f" "%PASTA_FINAL%\" >nul 2>&1
     set "ARQUIVO_GERADO=%%~nxf"
     set "ACHOU_EXE=1"
@@ -92,4 +93,5 @@ start "" explorer "%PASTA_FINAL%"
 echo.
 echo Pressione qualquer tecla para encerrar.
 pause >nul
+popd
 exit /b 0

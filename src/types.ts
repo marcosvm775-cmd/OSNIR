@@ -98,7 +98,7 @@ export interface ProductLicense {
   machineId: string;
   activatedAt: string;
   expiresAt: string | null; // null para vitalícia
-  planType: 'lifetime' | 'annual' | 'trial';
+  planType: 'monthly' | 'semiannual' | 'annual' | 'lifetime' | 'trial';
   signature: string;
   activationsLog?: LicenseActivation[];
 }

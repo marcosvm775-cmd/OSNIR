@@ -27,10 +27,14 @@ import {
   KeyRound,
   ShieldCheck,
   Smartphone,
+  Laptop,
+  ExternalLink,
+  Layers,
+  Clock,
 } from 'lucide-react';
 import { Passenger, Driver, Trip, FinancialConfig, CompanyConfig } from '../types';
 import { getAllDataExport, DEFAULT_COMPANY_CONFIG } from '../utils/storage';
-import { AdminLicenseGenerator } from './AdminLicenseGenerator';
+import { getStoredLicense, getTrialStatus, getLicenseExpiryDetails } from '../utils/license';
 import { PWAInstallButton } from './PWAInstallButton';
 
 interface SettingsManagerProps {
@@ -308,55 +312,80 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
         </div>
       </div>
 
-      {/* SEÇÃO ESPECIAL DO ADMINISTRADOR / VENDEDOR: GERADOR DE CHAVES OFICIAIS */}
-      <div className="bg-slate-900 text-white rounded-2xl border border-slate-700 shadow-md p-5 space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/30 shrink-0">
-              <KeyRound className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-base font-extrabold text-white">
-                  Gerador de Chaves de Ativação do Sistema
-                </h3>
-                <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-extrabold uppercase tracking-wider border border-amber-500/30">
-                  Painel do Proprietário
-                </span>
+      {/* SEÇÃO DE LICENCIAMENTO E ATIVAÇÃO DO SISTEMA */}
+      {(() => {
+        const currentLic = getStoredLicense();
+        const trial = getTrialStatus();
+        const expiryDetails = getLicenseExpiryDetails(currentLic);
+
+        return (
+          <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-2xl border border-slate-700 shadow-md p-5 space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center space-x-3">
+                <div className={`w-11 h-11 rounded-2xl flex items-center justify-center border shrink-0 ${
+                  currentLic
+                    ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+                    : 'bg-amber-500/20 text-amber-400 border-amber-500/30'
+                }`}>
+                  {currentLic ? <ShieldCheck className="w-6 h-6" /> : <Clock className="w-6 h-6" />}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base font-extrabold text-white">
+                      Licença do Aplicativo
+                    </h3>
+                    {currentLic ? (
+                      <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-black uppercase tracking-wider border border-emerald-500/30">
+                        {expiryDetails.planLabel}
+                      </span>
+                    ) : (
+                      <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-black uppercase tracking-wider border border-amber-500/30">
+                        Demonstração: {trial.daysRemaining} dias restantes
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-slate-300 mt-0.5">
+                    {currentLic ? (
+                      <>
+                        Licenciado para <strong className="text-white">{currentLic.licenseeName}</strong>
+                        {currentLic.expiresAt && expiryDetails.formattedExpiry && (
+                          <> • Vence em <span className="text-amber-300 font-bold">{expiryDetails.formattedExpiry}</span> ({expiryDetails.daysRemaining} dias)</>
+                        )}
+                        {!currentLic.expiresAt && ' • Acesso Vitalício Autorizado'}
+                      </>
+                    ) : (
+                      'Sistema funcionando no período gratuito de 10 dias. Para manter ativo, insira a chave fornecida.'
+                    )}
+                  </p>
+                </div>
               </div>
-              <p className="text-xs text-slate-300">
-                Gere chaves oficiais autênticas para ativar e vender o software para seus clientes (cada chave autoriza até 3 computadores).
-              </p>
+
+              <div className="flex items-center gap-2 shrink-0">
+                {onOpenLicenseModal && (
+                  <button
+                    type="button"
+                    onClick={onOpenLicenseModal}
+                    className="py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs transition shadow-sm flex items-center space-x-1.5 cursor-pointer"
+                  >
+                    <KeyRound className="w-4 h-4" />
+                    <span>{currentLic ? 'Gerenciar / Renovar Chave' : 'Inserir Chave de Ativação'}</span>
+                  </button>
+                )}
+                {onOpenDatabaseModal && (
+                  <button
+                    type="button"
+                    onClick={onOpenDatabaseModal}
+                    className="py-2.5 px-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs transition border border-slate-600 flex items-center space-x-1.5 cursor-pointer"
+                  >
+                    <Database className="w-4 h-4 text-blue-400" />
+                    <span>Banco Local</span>
+                  </button>
+                )}
+              </div>
             </div>
           </div>
-
-          <div className="flex items-center gap-2 shrink-0">
-            {onOpenLicenseModal && (
-              <button
-                type="button"
-                onClick={onOpenLicenseModal}
-                className="py-2 px-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs transition shadow-sm flex items-center space-x-1.5 cursor-pointer"
-              >
-                <ShieldCheck className="w-4 h-4" />
-                <span>Ver Status da Licença</span>
-              </button>
-            )}
-            {onOpenDatabaseModal && (
-              <button
-                type="button"
-                onClick={onOpenDatabaseModal}
-                className="py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs transition border border-slate-600 flex items-center space-x-1.5 cursor-pointer"
-              >
-                <Database className="w-4 h-4 text-blue-400" />
-                <span>Banco Local</span>
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Gerador de Chaves Embutido Diretamente na Tela */}
-        <AdminLicenseGenerator />
-      </div>
+        );
+      })()}
 
       {/* SEÇÃO 1: CADASTRO DA EMPRESA, LOGOMARCA E CORES */}
       <form
@@ -524,8 +553,8 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
                     disabled={logoUrl.startsWith('data:')}
                     className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-600 text-slate-700 disabled:opacity-60"
                   />
-                  <p className="text-[11px] text-slate-400">
-                    Formatos aceitos: PNG, JPG, JPEG, SVG ou WEBP. A imagem será desenhada no canto superior esquerdo de todas as guias em PDF.
+                  <p className="text-[11px] text-slate-500 leading-relaxed">
+                    Formatos aceitos: PNG, JPG, JPEG, SVG ou WEBP. A imagem será aplicada no topo do sistema, nas guias em PDF e como ícone da aplicação.
                   </p>
                 </div>
               </div>
@@ -701,6 +730,40 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
             </div>
           </div>
 
+          {/* Dica Informativa: Personalização do Ícone no PC e Celular */}
+          <div className="pt-4 border-t border-slate-100">
+            <div className="bg-emerald-50/70 border border-emerald-200 rounded-2xl p-4 space-y-2">
+              <div className="flex items-center space-x-2 text-emerald-950 font-extrabold text-xs">
+                <Laptop className="w-4 h-4 text-emerald-700" />
+                <span>Como Personalizar o Ícone no Computador e no Celular:</span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-[11px] text-emerald-900 leading-relaxed">
+                <div className="bg-white/80 p-3 rounded-xl border border-emerald-100 space-y-1">
+                  <strong className="text-emerald-950 flex items-center gap-1">
+                    💻 No Computador (Windows):
+                  </strong>
+                  <p>
+                    <strong>1. Na aba/navegador:</strong> Ao carregar sua logomarca acima e clicar em Salvar, o ícone da aba do navegador muda automaticamente para sua logo!
+                  </p>
+                  <p>
+                    <strong>2. No Atalho da Área de Trabalho:</strong> Clique com o <em>botão direito</em> no atalho do Osnir Turismo &gt; <em>Propriedades</em> &gt; <em>Alterar Ícone</em> &gt; escolha qualquer imagem ou arquivo de ícone (.ico ou .png) da sua agência.
+                  </p>
+                </div>
+                <div className="bg-white/80 p-3 rounded-xl border border-emerald-100 space-y-1">
+                  <strong className="text-emerald-950 flex items-center gap-1">
+                    📱 No Celular (Android / iPhone):
+                  </strong>
+                  <p>
+                    <strong>Instalação PWA:</strong> Ao instalar pelo navegador (Chrome/Safari), ele utiliza a logo do sistema.
+                  </p>
+                  <p>
+                    <strong>No Aplicativo APK:</strong> O ícone oficial de lançamento do APK vem embutido por segurança do Android. Para mudar a logo interna, basta fazer upload aqui nas configurações a qualquer momento!
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Interactive Live Preview Box */}
           <div className="pt-4 border-t border-slate-100">
             <h4 className="text-xs font-extrabold text-slate-800 mb-2 flex items-center gap-1.5">
@@ -860,6 +923,41 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
             </div>
           </div>
 
+          {/* LICENCIAMENTO & PERÍODO DE DEMONSTRAÇÃO (10 DIAS) */}
+          <div className="bg-slate-900 rounded-2xl border-2 border-slate-700 p-5 text-white shadow-md space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center space-x-3">
+                <div className="w-11 h-11 rounded-xl bg-amber-500/20 border border-amber-400/40 text-amber-300 flex items-center justify-center shrink-0">
+                  <ShieldCheck className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm sm:text-base font-black text-white">
+                      Licença do Sistema & Demonstração
+                    </h3>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 uppercase tracking-wider">
+                      10 Dias de Teste Grátis
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-300 mt-0.5">
+                    O sistema funciona liberado sem trava por 10 dias como demonstração. Após isso, exige a chave de produto.
+                  </p>
+                </div>
+              </div>
+
+              {onOpenLicenseModal && (
+                <button
+                  type="button"
+                  onClick={onOpenLicenseModal}
+                  className="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 text-xs font-black rounded-xl shadow transition active:scale-95 cursor-pointer shrink-0 uppercase tracking-wider flex items-center justify-center gap-1.5"
+                >
+                  <KeyRound className="w-4 h-4" />
+                  <span>Gerenciar Licença / Inserir Chave</span>
+                </button>
+              )}
+            </div>
+          </div>
+
           {/* VERSÃO PARA CELULAR (ANDROID & IPHONE) - BANCO 100% OFFLINE */}
           <div className="bg-gradient-to-r from-emerald-900 to-slate-900 rounded-2xl border-2 border-emerald-500/40 p-5 text-white shadow-md space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -908,6 +1006,89 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
 
             <div className="pt-2 border-t border-white/10">
               <PWAInstallButton variant="card" />
+            </div>
+          </div>
+
+          {/* GERADORES OFICIAIS (CELULAR APK & COMPUTADOR PC .EXE) COM A NOVA BARRA */}
+          <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-2xl border-2 border-indigo-500/40 p-5 text-white shadow-md space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center space-x-3">
+                <div className="w-11 h-11 rounded-xl bg-indigo-500/20 border border-indigo-400/40 text-indigo-300 flex items-center justify-center shrink-0">
+                  <Layers className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm sm:text-base font-black text-white">
+                      Geradores Oficiais do Sistema (Nova Barra & Menus Atualizados)
+                    </h3>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-400 text-slate-950 uppercase tracking-wider">
+                      v2.5 Atualizada
+                    </span>
+                  </div>
+                  <p className="text-xs text-indigo-200/90 mt-0.5">
+                    Os geradores foram reconfigurados para compilar sempre os arquivos mais recentes com a nova barra lateral de guias e cabeçalho.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Card 1: Gerador para Computador (PC .EXE) */}
+              <div className="p-4 rounded-xl bg-white/5 border border-indigo-500/30 space-y-3">
+                <div className="flex items-center gap-2 text-indigo-300 font-bold text-xs">
+                  <Laptop className="w-4 h-4 text-indigo-400" />
+                  <span>1. Gerador para Computador (Windows .EXE)</span>
+                </div>
+
+                <p className="text-[11px] text-slate-300 leading-relaxed">
+                  O script <strong>GERAR_INSTALADOR_FACIL.bat</strong> foi ajustado para <strong>forçar a recompilação limpa</strong> com o Vite antes de empacotar o executável. Assim, a nova barra e todos os novos recursos sempre estarão no seu instalador final.
+                </p>
+
+                <div className="bg-slate-950/80 p-2.5 rounded-lg border border-slate-800 space-y-1 text-[11px] text-slate-300">
+                  <p className="font-semibold text-amber-300">Como gerar o instalador do PC no seu computador:</p>
+                  <p>1. Dê um duplo clique no arquivo <strong>GERAR_INSTALADOR_FACIL.bat</strong>.</p>
+                  <p>2. Ele recompilará a nova barra e gerará o arquivo <strong>.exe</strong> em <code className="text-indigo-300">INSTALADOR_FINAL_PARA_O_CLIENTE</code>.</p>
+                </div>
+              </div>
+
+              {/* Card 2: Gerador para Celular (Android .APK) */}
+              <div className="p-4 rounded-xl bg-white/5 border border-emerald-500/30 space-y-3">
+                <div className="flex items-center gap-2 text-emerald-300 font-bold text-xs">
+                  <Smartphone className="w-4 h-4 text-emerald-400" />
+                  <span>2. Gerador para Celular (Android .APK)</span>
+                </div>
+
+                <p className="text-[11px] text-slate-300 leading-relaxed">
+                  O pacote offline e o projeto nativo do Android foram sincronizados com a versão mais recente contendo o novo Menu Lateral Esquerdo, barra rápida e simulador.
+                </p>
+
+                <div className="flex flex-col gap-2 pt-1">
+                  <a
+                    href="/webintoapp_pacote.zip"
+                    download="osnir_turismo_com_nova_barra.zip"
+                    className="py-2 px-3 bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-black rounded-lg transition flex items-center justify-center gap-1.5 shadow cursor-pointer text-center"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Baixar Pacote ZIP com Nova Barra (~732 KB)</span>
+                  </a>
+
+                  <div className="flex items-center gap-2">
+                    <a
+                      href="https://www.webintoapp.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 py-1.5 px-2.5 bg-emerald-600 hover:bg-emerald-500 text-slate-950 text-xs font-black rounded-lg transition flex items-center justify-center gap-1 shadow text-center"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                      <span>Abrir WebIntoApp</span>
+                    </a>
+
+                    <span className="text-[10px] text-slate-400">
+                      Ou execute <strong>GERAR_APK_CELULAR.bat</strong>
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 

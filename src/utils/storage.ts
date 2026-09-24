@@ -137,7 +137,7 @@ export const DEFAULT_COMPANY_CONFIG: CompanyConfig = {
   primaryColor: '#065f46', // Emerald 800
   secondaryColor: '#047857', // Emerald 700
   accentColor: '#10b981', // Emerald 500
-  phone: '',
+  phone: '(37) 99124-3101',
   cnpjOrCpf: '',
 };
 

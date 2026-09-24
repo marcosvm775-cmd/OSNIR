@@ -15,6 +15,8 @@ import {
   Receipt,
   Database,
   KeyRound,
+  Menu,
+  Smartphone,
 } from 'lucide-react';
 import { ActiveTab, CompanyConfig } from '../types';
 import { PWAInstallButton } from './PWAInstallButton';
@@ -33,7 +35,10 @@ interface HeaderProps {
   onOpenLicenseModal?: () => void;
   onOpenDatabaseModal?: () => void;
   onOpenKeyGenerator?: () => void;
+  onOpenPhoneSimulator?: () => void;
+  onOpenMobileMenu?: () => void;
   isLicenseActive?: boolean;
+  trialDaysRemaining?: number;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -49,7 +54,10 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenLicenseModal,
   onOpenDatabaseModal,
   onOpenKeyGenerator,
+  onOpenPhoneSimulator,
+  onOpenMobileMenu,
   isLicenseActive = false,
+  trialDaysRemaining = 10,
 }) => {
   const currentPrimaryColor = companyConfig?.primaryColor || '#065f46';
   const currentSecondaryColor = companyConfig?.secondaryColor || '#047857';
@@ -64,8 +72,22 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3.5">
         {/* Top Header Bar: Brand + Quick Actions */}
         <div className="flex items-center justify-between gap-1.5 sm:gap-3">
-          {/* Logo & Brand Info */}
+          {/* Logo & Brand Info + Mobile Menu Button */}
           <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
+            {/* Botão Menu Lateral Esquerdo (Lista de Guias no Celular e Tablets) */}
+            {onOpenMobileMenu && (
+              <button
+                id="header-mobile-menu-btn"
+                type="button"
+                onClick={onOpenMobileMenu}
+                className="p-1.5 sm:p-2 -ml-1 rounded-xl bg-white/20 hover:bg-white/30 active:scale-95 text-white flex items-center justify-center shrink-0 border border-white/40 cursor-pointer shadow-xs transition"
+                title="Abrir Menu de Guias do Lado Esquerdo (Lista)"
+                aria-label="Abrir Menu de Guias"
+              >
+                <Menu className="w-5 h-5 text-white" />
+              </button>
+            )}
+
             {companyConfig?.logoUrl ? (
               <div className="h-8 w-10 sm:h-10 sm:w-13 bg-white rounded-xl p-0.5 sm:p-1 border-2 border-white/60 flex items-center justify-center shadow-xs shrink-0 overflow-hidden">
                 <img
@@ -130,6 +152,19 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
             )}
 
+            {/* Botão Simulador de Celular no Sistema */}
+            {onOpenPhoneSimulator && (
+              <button
+                id="header-phone-simulator-btn"
+                onClick={onOpenPhoneSimulator}
+                className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-1.5 sm:py-2 bg-emerald-500/30 hover:bg-emerald-500/40 text-emerald-100 active:scale-95 text-xs font-black rounded-xl shadow-xs transition cursor-pointer border border-emerald-300/50"
+                title="Simulador de Celular (Ver como roda no smartphone)"
+              >
+                <Smartphone className="w-3.5 h-3.5 text-emerald-300" />
+                <span className="hidden sm:inline text-[11px] font-bold">Simulador</span>
+              </button>
+            )}
+
             {/* Botão Licença & Ativação */}
             {onOpenLicenseModal && (
               <button
@@ -138,13 +173,21 @@ export const Header: React.FC<HeaderProps> = ({
                 className={`inline-flex items-center justify-center p-1.5 sm:px-2.5 sm:py-2 active:scale-95 text-xs font-bold rounded-xl shadow-xs transition border cursor-pointer ${
                   isLicenseActive
                     ? 'bg-emerald-950/50 hover:bg-emerald-900/60 border-emerald-400/50 text-emerald-200'
-                    : 'bg-amber-500/30 hover:bg-amber-500/40 border-amber-300/60 text-amber-100 animate-pulse'
+                    : trialDaysRemaining > 0
+                    ? 'bg-amber-500/25 hover:bg-amber-500/35 border-amber-300/60 text-amber-100'
+                    : 'bg-rose-500/30 hover:bg-rose-500/40 border-rose-300/60 text-rose-100 animate-pulse'
                 }`}
-                title={isLicenseActive ? 'Software Licenciado' : 'Ativar Licença do Produto'}
+                title={
+                  isLicenseActive
+                    ? 'Software Licenciado'
+                    : trialDaysRemaining > 0
+                    ? `Período de Demonstração: ${trialDaysRemaining} dia(s) restante(s)`
+                    : 'Demonstração Expirada - Ativar Licença'
+                }
               >
                 <ShieldCheck className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
                 <span className="hidden md:inline ml-1 text-[11px] font-extrabold">
-                  {isLicenseActive ? 'Licenciado' : 'Ativar'}
+                  {isLicenseActive ? 'Licenciado' : trialDaysRemaining > 0 ? `Demo (${trialDaysRemaining}d)` : 'Bloqueado'}
                 </span>
               </button>
             )}

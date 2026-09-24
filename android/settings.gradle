@@ -3,3 +3,8 @@ include ':capacitor-cordova-android-plugins'
 project(':capacitor-cordova-android-plugins').projectDir = new File('./capacitor-cordova-android-plugins/')
 
 apply from: 'capacitor.settings.gradle'
+
+// Garante que o modulo :capacitor-android use a pasta local embutida ./capacitor-android caso node_modules nao esteja disponivel
+if (new File('./capacitor-android/src/main/java').exists()) {
+    project(':capacitor-android').projectDir = new File('./capacitor-android')
+}

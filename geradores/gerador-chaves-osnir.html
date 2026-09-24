@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerador Oficial de Chaves - Osnir Turismo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+    body { background-color: #0f172a; color: #f8fafc; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .card { background-color: #1e293b; border: 1px solid #334155; border-radius: 20px; max-width: 580px; width: 100%; padding: 28px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+    .badge { display: inline-block; background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); padding: 4px 10px; border-radius: 9999px; font-size: 11px; font-weight: 800; text-transform: uppercase; margin-bottom: 8px; }
+    h1 { font-size: 22px; font-weight: 900; color: #ffffff; margin-bottom: 6px; }
+    p.sub { color: #94a3b8; font-size: 13px; margin-bottom: 24px; line-height: 1.4; }
+    .form-group { margin-bottom: 16px; }
+    label { display: block; font-size: 12px; font-weight: 700; color: #cbd5e1; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    input, select { width: 100%; background: #0f172a; border: 1px solid #475569; border-radius: 12px; padding: 12px 14px; font-size: 14px; color: #ffffff; outline: none; font-weight: 600; }
+    input:focus, select:focus { border-color: #f59e0b; box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2); }
+    .btn-generate { width: 100%; background: linear-gradient(135deg, #f59e0b, #d97706); color: #0f172a; font-weight: 900; font-size: 15px; border: none; border-radius: 12px; padding: 14px; cursor: pointer; transition: all 0.2s; margin-top: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .btn-generate:hover { background: linear-gradient(135deg, #fbbf24, #f59e0b); transform: translateY(-1px); }
+    .btn-generate:active { transform: scale(0.98); }
+    .result-box { margin-top: 24px; background: #0f172a; border: 1px solid #334155; border-radius: 14px; padding: 18px; display: none; }
+    .key-display { font-family: monospace; font-size: 18px; font-weight: 900; color: #34d399; letter-spacing: 1px; word-break: break-all; margin: 8px 0; background: #022c22; padding: 10px 14px; border-radius: 8px; border: 1px solid #059669; }
+    .btn-group { display: flex; gap: 10px; margin-top: 14px; }
+    .btn-action { flex: 1; padding: 10px; border-radius: 10px; font-size: 12px; font-weight: 800; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .btn-copy { background: #334155; color: #f8fafc; }
+    .btn-copy:hover { background: #475569; }
+    .btn-whatsapp { background: #059669; color: white; }
+    .btn-whatsapp:hover { background: #10b981; }
+    .footer-note { font-size: 11px; color: #64748b; text-align: center; margin-top: 20px; line-height: 1.4; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <span class="badge">Ferramenta Exclusiva do Proprietário</span>
+    <h1>Gerador de Chaves de Ativação</h1>
+    <p class="sub">Emita chaves oficiais de licenciamento para clientes do sistema Osnir Turismo. Guarde este arquivo em segurança em seu computador ou celular.</p>
+
+    <div class="form-group">
+      <label>Nome do Cliente / Agência:</label>
+      <input type="text" id="clientName" value="AGÊNCIA DE TURISMO" placeholder="Ex: EXPRESSO VIAGENS LTDA" oninput="this.value = this.value.toUpperCase()">
+    </div>
+
+    <div class="form-group">
+      <label>Periodicidade / Plano da Licença:</label>
+      <select id="planType">
+        <option value="monthly">🗓️ Mensal (Válido por 30 Dias)</option>
+        <option value="semiannual">🗓️ Semestral (Válido por 6 Meses / 180 Dias)</option>
+        <option value="annual" selected>🗓️ Anual (Válido por 12 Meses / 365 Dias)</option>
+        <option value="lifetime">♾️ Vitalícia (Sem Expiração)</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Limite de Computadores por Chave:</label>
+      <input type="text" value="3 Computadores Simultâneos (Padrão)" readonly style="background: #1e293b; color: #94a3b8; cursor: not-allowed;">
+    </div>
+
+    <button class="btn-generate" onclick="generateKey()">⚡ Gerar Chave do Produto</button>
+
+    <div class="result-box" id="resultBox">
+      <label style="color: #34d399;">Chave Gerada com Sucesso:</label>
+      <div class="key-display" id="keyText">OT26A-XXXX-YYYY-ZZZZ-3S</div>
+      <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;" id="planDescription">Plano Anual • Autoriza até 3 Computadores</div>
+
+      <div class="btn-group">
+        <button class="btn-action btn-copy" onclick="copyKey()">📋 Copiar Chave</button>
+        <button class="btn-action btn-whatsapp" onclick="copyWhatsApp()">💬 Copiar para WhatsApp</button>
+      </div>
+    </div>
+
+    <div class="footer-note">
+      🔒 As chaves geradas usam validação criptográfica compatível com o APK e o programa .exe do Osnir Turismo. Cada chave pode ativar o Computador 1, 2 e 3 da mesma empresa.
+    </div>
+  </div>
+
+  <script>
+    // Algoritmo determinístico idêntico ao aplicativo e APK oficial
+    const SECRET_SALT = 'OSNIR_TURISMO_TRANSPORTES_2026_SECURE_KEY';
+
+    function calculateKeyChecksum(block1, block2, salt) {
+      const input = `${block1}:${block2}:${salt}`;
+      let hash = 5381;
+      for (let i = 0; i < input.length; i++) {
+        hash = (hash * 33) ^ input.charCodeAt(i);
+        hash |= 0;
+      }
+      const hex = Math.abs(hash).toString(16).toUpperCase().padStart(8, '0');
+      return hex.substring(0, 4);
+    }
+
+    function generateProductKey(clientName, planType, seats = 3) {
+      let prefix = 'OT26M';
+      if (planType === 'monthly') prefix = 'OT26M';
+      else if (planType === 'semiannual') prefix = 'OT26S';
+      else if (planType === 'annual') prefix = 'OT26A';
+      else if (planType === 'lifetime') prefix = 'OT26V';
+
+      const rawSeed = `${(clientName || 'CLIENTE').toUpperCase().replace(/[^A-Z]/g, '')}-${Date.now()}`;
+      let h1 = 0;
+      for (let i = 0; i < rawSeed.length; i++) {
+        h1 = (h1 << 5) - h1 + rawSeed.charCodeAt(i);
+        h1 |= 0;
+      }
+
+      const b1 = Math.abs(h1).toString(16).toUpperCase().padStart(8, '0').substring(0, 4);
+      const randomB2 = Math.floor(1000 + Math.random() * 9000).toString(16).toUpperCase().padStart(4, '0');
+      const checksum = calculateKeyChecksum(b1, randomB2, SECRET_SALT);
+
+      return `${prefix}-${b1}-${randomB2}-${checksum}-${seats}S`;
+    }
+
+    let currentKey = '';
+    let currentPlanName = '';
+
+    function generateKey() {
+      const name = document.getElementById('clientName').value.trim() || 'CLIENTE';
+      const plan = document.getElementById('planType').value;
+      currentKey = generateProductKey(name, plan, 3);
+
+      const planLabels = {
+        monthly: 'Mensal (30 Dias)',
+        semiannual: 'Semestral (6 Meses / 180 Dias)',
+        annual: 'Anual (12 Meses / 365 Dias)',
+        lifetime: 'Vitalícia (Sem mensalidades)'
+      };
+      currentPlanName = planLabels[plan];
+
+      document.getElementById('keyText').innerText = currentKey;
+      document.getElementById('planDescription').innerText = `Plano: ${currentPlanName} • Autoriza até 3 Computadores`;
+      document.getElementById('resultBox').style.display = 'block';
+    }
+
+    function copyKey() {
+      if (!currentKey) return;
+      navigator.clipboard.writeText(currentKey);
+      alert('Chave copiada para a área de transferência!');
+    }
+
+    function copyWhatsApp() {
+      if (!currentKey) return;
+      const name = document.getElementById('clientName').value.trim() || 'CLIENTE';
+      const msg = `*CHAVE DE ATIVAÇÃO DO SISTEMA OSNIR TURISMO*\n\n` +
+        `🏢 Cliente: *${name}*\n` +
+        `🔑 Chave do Produto: *${currentKey}*\n` +
+        `⏳ Plano / Validade: *${currentPlanName}*\n` +
+        `💻 Instalações Permitidas: *Até 3 Computadores Simultâneos*\n\n` +
+        `*Como Ativar no Programa:*\n` +
+        `1. Abra o sistema no computador ou celular;\n` +
+        `2. Na tela de ativação, cole ou digite a chave acima;\n` +
+        `3. Escolha o número da máquina (Computador 1, 2 ou 3) e clique em Desbloquear.\n\n` +
+        `Suporte técnico WhatsApp: (37) 9 9124-3101 à disposição!`;
+
+      navigator.clipboard.writeText(msg);
+      alert('Mensagem formatada para o WhatsApp copiada com sucesso!');
+    }
+  </script>
+</body>
+</html>

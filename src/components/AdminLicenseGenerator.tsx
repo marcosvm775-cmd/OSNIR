@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { KeyRound, Copy, Check, ShieldCheck, Sparkles, MessageCircle, AlertCircle, RefreshCw } from 'lucide-react';
-import { generateProductKey } from '../utils/license';
+import { KeyRound, Copy, Check, ShieldCheck, Sparkles, MessageCircle, AlertCircle, RefreshCw, Clock, RotateCcw, Download, Smartphone, ExternalLink, HelpCircle } from 'lucide-react';
+import { generateProductKey, simulateTrialExpiry, resetTrialForTesting } from '../utils/license';
 
 interface AdminLicenseGeneratorProps {
   onClose?: () => void;
@@ -9,10 +9,23 @@ interface AdminLicenseGeneratorProps {
 
 export const AdminLicenseGenerator: React.FC<AdminLicenseGeneratorProps> = ({ onClose, onApplyKey }) => {
   const [clientName, setClientName] = useState('AGÊNCIA DE TURISMO');
-  const [planType, setPlanType] = useState<'lifetime' | 'annual'>('lifetime');
+  const [planType, setPlanType] = useState<'monthly' | 'semiannual' | 'annual' | 'lifetime'>('monthly');
   const [seats, setSeats] = useState<number>(3);
   const [generatedKey, setGeneratedKey] = useState<string>('');
   const [copied, setCopied] = useState(false);
+
+  const getPlanLabel = (type: 'monthly' | 'semiannual' | 'annual' | 'lifetime') => {
+    switch (type) {
+      case 'monthly':
+        return 'Mensal (30 Dias)';
+      case 'semiannual':
+        return 'Semestral (6 Meses)';
+      case 'annual':
+        return 'Anual (12 Meses)';
+      case 'lifetime':
+        return 'Vitalícia (Sem mensalidades)';
+    }
+  };
 
   const handleGenerate = () => {
     const key = generateProductKey(clientName, planType, seats);
@@ -33,12 +46,12 @@ export const AdminLicenseGenerator: React.FC<AdminLicenseGeneratorProps> = ({ on
       `🏢 Cliente: *${clientName}*\n` +
       `🔑 Chave do Produto: *${generatedKey}*\n` +
       `💻 Instalações Permitidas: *Até ${seats} Computadores Simultâneos*\n` +
-      `⏳ Licença: *${planType === 'lifetime' ? 'Vitalícia (Sem mensalidades)' : 'Anual (12 Meses)'}*\n\n` +
-      `*Como Ativar:*\n` +
-      `1. Abra o programa OSNIR TURISMO no computador;\n` +
-      `2. Na tela de ativação, cole a chave acima;\n` +
-      `3. Escolha o número da máquina (Computador 1, 2 ou 3) e clique em ATIVAR.\n\n` +
-      `Suporte técnico à disposição!`;
+      `⏳ Plano / Validade: *${getPlanLabel(planType)}*\n\n` +
+      `*Como Ativar no Programa:*\n` +
+      `1. Abra o programa OSNIR TURISMO no computador ou celular;\n` +
+      `2. Na tela de ativação, cole ou digite a chave acima;\n` +
+      `3. Escolha o número da máquina (Computador 1, 2 ou 3) e clique em DESBLOQUEAR.\n\n` +
+      `Suporte técnico WhatsApp: (37) 9 9124-3101 à disposição!`;
 
     navigator.clipboard.writeText(msg);
     setCopied(true);
@@ -79,14 +92,16 @@ export const AdminLicenseGenerator: React.FC<AdminLicenseGeneratorProps> = ({ on
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-slate-300">Tipo de Licença:</label>
+          <label className="text-xs font-semibold text-slate-300">Periodicidade / Plano:</label>
           <select
             value={planType}
-            onChange={(e) => setPlanType(e.target.value as 'lifetime' | 'annual')}
-            className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+            onChange={(e) => setPlanType(e.target.value as 'monthly' | 'semiannual' | 'annual' | 'lifetime')}
+            className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-500 font-bold"
           >
-            <option value="lifetime">Vitalícia (Sem expiração)</option>
-            <option value="annual">Anual (12 Meses)</option>
+            <option value="monthly">🗓️ Mensal (30 Dias)</option>
+            <option value="semiannual">🗓️ Semestral (6 Meses / 180 Dias)</option>
+            <option value="annual">🗓️ Anual (12 Meses / 365 Dias)</option>
+            <option value="lifetime">♾️ Vitalícia (Permanente)</option>
           </select>
         </div>
       </div>
@@ -152,8 +167,106 @@ export const AdminLicenseGenerator: React.FC<AdminLicenseGeneratorProps> = ({ on
 
       <div className="text-[11px] text-slate-400 space-y-1 bg-slate-800/40 p-2.5 rounded-lg border border-slate-800">
         <p className="font-semibold text-slate-300">💡 Como funciona para o seu comprador:</p>
-        <p>• O cliente pode usar esta <strong>mesma chave em até 3 computadores</strong> diferentes da empresa dele (ex: Caixa, Escritório e Balcão).</p>
-        <p>• Cada máquina registra seu slot (Instalação 1 de 3, 2 de 3 e 3 de 3).</p>
+        <p>• O sistema roda por <strong>10 dias livres como demonstração</strong> sem nenhuma trava.</p>
+        <p>• Após os 10 dias, ele trava e exige a Chave de Ativação oficial.</p>
+        <p>• O comprador pode usar a <strong>mesma chave em até 3 computadores</strong> da empresa dele.</p>
+      </div>
+
+      {/* Ferramentas de Teste do Administrador */}
+      <div className="pt-2 border-t border-slate-800 flex flex-wrap gap-2 text-xs">
+        <button
+          type="button"
+          onClick={() => {
+            simulateTrialExpiry();
+            window.location.reload();
+          }}
+          className="flex-1 py-1.5 px-2.5 rounded-lg bg-rose-950/70 hover:bg-rose-900 border border-rose-800/60 text-rose-300 font-bold transition flex items-center justify-center gap-1 cursor-pointer"
+          title="Simula 11 dias passados para testar a tela de bloqueio do trial"
+        >
+          <Clock className="w-3.5 h-3.5" />
+          <span>Simular Expiração dos 10 Dias (Travar)</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            resetTrialForTesting();
+            window.location.reload();
+          }}
+          className="py-1.5 px-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 font-bold transition flex items-center justify-center gap-1 cursor-pointer"
+          title="Reinicia a contagem dos 10 dias de demonstração a partir de hoje"
+        >
+          <RotateCcw className="w-3.5 h-3.5" />
+          <span>Reiniciar Demonstração (10d)</span>
+        </button>
+      </div>
+
+      {/* ÁREA EXCLUSIVA DE DESENVOLVEDOR: GERAR APK NO WEB INTO APP */}
+      <div className="mt-3 p-3 bg-gradient-to-r from-emerald-950/60 to-slate-900 border-2 border-emerald-500/40 rounded-xl text-white space-y-2.5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <Smartphone className="w-4 h-4 text-emerald-400" />
+            <span className="text-xs font-black text-emerald-300 uppercase tracking-wide">
+              Gerar APK Android no WebIntoApp (Área Dev)
+            </span>
+          </div>
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+            Dica do Criador
+          </span>
+        </div>
+
+        <p className="text-[11px] text-slate-300 leading-relaxed">
+          Sim! O <strong>WebIntoApp.com</strong> é uma excelente opção para empacotar o sistema em um <strong>APK instalável</strong> para Android. 
+        </p>
+
+        <div className="bg-slate-950/80 p-2.5 rounded-lg border border-slate-800 space-y-2 text-[11px]">
+          <p className="font-bold text-amber-300">Como resolver erro na hora de gerar no WebIntoApp:</p>
+          <div className="space-y-1.5 text-slate-300">
+            <p>
+              <strong>1. O tamanho do arquivo está perfeito:</strong> O ZIP gerado tem apenas <strong>~650 KB</strong> (o WebIntoApp aceita até 20 MB, então não é o tamanho).
+            </p>
+            <p>
+              <strong>2. Erro de "Package Name já existente":</strong> Se você já gerou um app antes com <code className="text-emerald-400 bg-slate-900 px-1 py-0.5 rounded">com.osnirturismo.app</code>, o WebIntoApp trava porque não deixa criar um novo com o mesmo identificador. <strong>Mude para <code className="text-emerald-400 bg-slate-900 px-1 py-0.5 rounded">com.osnirturismo.v2</code></strong> na tela do WebIntoApp!
+            </p>
+            <p>
+              <strong>3. Baixe o ZIP Atualizado:</strong> Clique no botão amarelo abaixo para baixar o ZIP com as últimas atualizações (incluindo o novo Menu Lateral Esquerdo).
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-1">
+          <a
+            href="/webintoapp_pacote.zip"
+            download="osnir_turismo_webintoapp.zip"
+            className="flex-1 py-2 px-3 bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-black rounded-lg transition flex items-center justify-center gap-1.5 shadow cursor-pointer text-center"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>Baixar ZIP Puro Offline (~648 KB)</span>
+          </a>
+
+          <a
+            href="https://www.webintoapp.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 py-2 px-3 bg-emerald-600 hover:bg-emerald-500 text-slate-950 text-xs font-black rounded-lg transition flex items-center justify-center gap-1.5 shadow"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+            <span>Abrir WebIntoApp.com</span>
+          </a>
+
+          <button
+            type="button"
+            onClick={() => {
+              const url = window.location.href;
+              navigator.clipboard.writeText(url);
+              alert('URL do app copiada com sucesso! Cole no WebIntoApp: ' + url);
+            }}
+            className="py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-lg transition flex items-center justify-center gap-1.5 border border-slate-700 cursor-pointer"
+          >
+            <Copy className="w-3.5 h-3.5 text-amber-400" />
+            <span>Copiar URL</span>
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -50,16 +50,26 @@ if exist "%RAIZ%dist\icon.ico" copy /y "%RAIZ%dist\icon.ico" "%PASTA_DESTINO%\" 
 (
 echo @echo off
 echo title OSNIR TURISMO
+echo set "SISTEMA_URL=file:///%PASTA_DESTINO:\=/%/sistema/index.html"
+echo set "CHROME_FLAGS=--allow-file-access-from-files --allow-running-insecure-content --disable-web-security --user-data-dir=\"%%temp%%\OsnirTurismoBrowserProfile\" --window-size=1280,820"
 echo if exist "%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge.exe" ^(
-echo     start "" "%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge.exe" --app="file:///%PASTA_DESTINO:\=/%/sistema/index.html" --window-size=1280,800
+echo     start "" "%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge.exe" --app="%%SISTEMA_URL%%" %%CHROME_FLAGS%%
 echo     exit /b 0
 echo ^)
 echo if exist "%ProgramFiles%\Microsoft\Edge\Application\msedge.exe" ^(
-echo     start "" "%ProgramFiles%\Microsoft\Edge\Application\msedge.exe" --app="file:///%PASTA_DESTINO:\=/%/sistema/index.html" --window-size=1280,800
+echo     start "" "%ProgramFiles%\Microsoft\Edge\Application\msedge.exe" --app="%%SISTEMA_URL%%" %%CHROME_FLAGS%%
 echo     exit /b 0
 echo ^)
 echo if exist "%ProgramFiles%\Google\Chrome\Application\chrome.exe" ^(
-echo     start "" "%ProgramFiles%\Google\Chrome\Application\chrome.exe" --app="file:///%PASTA_DESTINO:\=/%/sistema/index.html" --window-size=1280,800
+echo     start "" "%ProgramFiles%\Google\Chrome\Application\chrome.exe" --app="%%SISTEMA_URL%%" %%CHROME_FLAGS%%
+echo     exit /b 0
+echo ^)
+echo if exist "%ProgramFiles(x86)%\Google\Chrome\Application\chrome.exe" ^(
+echo     start "" "%ProgramFiles(x86)%\Google\Chrome\Application\chrome.exe" --app="%%SISTEMA_URL%%" %%CHROME_FLAGS%%
+echo     exit /b 0
+echo ^)
+echo if exist "%LocalAppData%\Google\Chrome\Application\chrome.exe" ^(
+echo     start "" "%LocalAppData%\Google\Chrome\Application\chrome.exe" --app="%%SISTEMA_URL%%" %%CHROME_FLAGS%%
 echo     exit /b 0
 echo ^)
 echo start "" "%PASTA_DESTINO%\sistema\index.html"

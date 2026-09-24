@@ -33,8 +33,11 @@ import { SettingsManager } from './components/SettingsManager';
 import { LicenseModal } from './components/LicenseModal';
 import { DatabaseStatusModal } from './components/DatabaseStatusModal';
 import { OfflineIndicator } from './components/OfflineIndicator';
+import { TrialExpiredLock } from './components/TrialExpiredLock';
+import { MobileSideMenu } from './components/MobileSideMenu';
+import { PhoneSimulatorModal } from './components/PhoneSimulatorModal';
 import { initializeLocalDatabase } from './utils/database';
-import { isProductActivated } from './utils/license';
+import { isProductActivated, getTrialStatus, isSystemAccessAllowed } from './utils/license';
 import { generateGeneralPassengersListPdf } from './utils/pdfGenerator';
 import {
   Search,
@@ -85,12 +88,17 @@ export default function App() {
   const [isLicenseModalOpen, setIsLicenseModalOpen] = useState(false);
   const [isLicenseModalDirectToGenerator, setIsLicenseModalDirectToGenerator] = useState(false);
   const [isDatabaseModalOpen, setIsDatabaseModalOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isPhoneSimulatorOpen, setIsPhoneSimulatorOpen] = useState(false);
   const [isLicenseActive, setIsLicenseActive] = useState<boolean>(() => isProductActivated());
+  const [trialInfo, setTrialInfo] = useState(() => getTrialStatus());
 
   const handleOpenLicenseModal = (directToGenerator: boolean = false) => {
     setIsLicenseModalDirectToGenerator(directToGenerator);
     setIsLicenseModalOpen(true);
   };
+
+  const isSystemUnlocked = isLicenseActive || trialInfo.isTrialActive;
 
   // Function to reload state from storage (used on database restore)
   const reloadAllData = () => {
@@ -111,6 +119,19 @@ export default function App() {
     reloadAllData();
     setIsLicenseActive(isProductActivated());
   }, []);
+
+  // Atualiza dinamicamente o título e o ícone da aba/aplicativo com a logo e nome personalizados
+  useEffect(() => {
+    if (companyConfig.companyName) {
+      document.title = companyConfig.companyName;
+    }
+    if (companyConfig.logoUrl) {
+      const favicons = document.querySelectorAll("link[rel*='icon'], link[rel='apple-touch-icon']");
+      favicons.forEach((el) => {
+        (el as HTMLLinkElement).href = companyConfig.logoUrl;
+      });
+    }
+  }, [companyConfig.companyName, companyConfig.logoUrl]);
 
   const handleSaveCompanyConfig = (newConfig: CompanyConfig) => {
     setCompanyConfig(newConfig);
@@ -488,7 +509,10 @@ export default function App() {
         onOpenLicenseModal={() => handleOpenLicenseModal(false)}
         onOpenDatabaseModal={() => setIsDatabaseModalOpen(true)}
         onOpenKeyGenerator={() => handleOpenLicenseModal(true)}
+        onOpenPhoneSimulator={() => setIsPhoneSimulatorOpen(true)}
+        onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
         isLicenseActive={isLicenseActive}
+        trialDaysRemaining={trialInfo.daysRemaining}
       />
 
       {/* Main Content Area */}
@@ -959,9 +983,25 @@ export default function App() {
       <LicenseModal
         isOpen={isLicenseModalOpen}
         onClose={() => setIsLicenseModalOpen(false)}
-        onLicenseUpdated={(lic) => setIsLicenseActive(!!lic)}
+        onLicenseUpdated={(lic) => {
+          setIsLicenseActive(!!lic);
+          setTrialInfo(getTrialStatus());
+        }}
         initialShowGenerator={isLicenseModalDirectToGenerator}
       />
+
+      {/* Trava Automática de Demonstração (Após 10 dias só funciona com Chave de Ativação) */}
+      {!isSystemUnlocked && (
+        <TrialExpiredLock
+          onLicenseActivated={(lic) => {
+            setIsLicenseActive(true);
+            setTrialInfo(getTrialStatus());
+            showToast(`Sistema liberado com sucesso para ${lic.licenseeName}!`);
+          }}
+          companyName={companyConfig.companyName}
+          supportPhone={companyConfig.phone || '(37) 99124-3101'}
+        />
+      )}
 
       {/* Local Database Initialization & Health Modal */}
       <DatabaseStatusModal
@@ -973,7 +1013,41 @@ export default function App() {
       {/* Offline Connectivity & Storage Banner */}
       <OfflineIndicator />
 
-      {/* Bottom Navigation with 6 tabs */}
+      {/* Menu Lateral Esquerdo no Formato de Lista (Mobile & Tablets) */}
+      <MobileSideMenu
+        isOpen={isMobileMenuOpen}
+        onClose={() => setIsMobileMenuOpen(false)}
+        activeTab={activeTab}
+        onChangeTab={(tab) => {
+          if (tab !== 'new-passenger') {
+            setEditingPassenger(null);
+          }
+          setActiveTab(tab);
+        }}
+        passengerCount={passengers.length}
+        driverCount={drivers.length}
+        dailyCount={currentDailyPassengerIds.length}
+        tripCount={trips.length}
+        sellerCount={sellerCount}
+        companyConfig={companyConfig}
+        onOpenDriverModal={() => setIsDriverModalOpen(true)}
+        onOpenDatabaseModal={() => setIsDatabaseModalOpen(true)}
+        onOpenLicenseModal={() => handleOpenLicenseModal(false)}
+        onOpenKeyGenerator={() => handleOpenLicenseModal(true)}
+        onOpenPhoneSimulator={() => setIsPhoneSimulatorOpen(true)}
+        isLicenseActive={isLicenseActive}
+        trialDaysRemaining={trialInfo.daysRemaining}
+      />
+
+      {/* Simulador Interativo de Celular no Sistema */}
+      <PhoneSimulatorModal
+        isOpen={isPhoneSimulatorOpen}
+        onClose={() => setIsPhoneSimulatorOpen(false)}
+        companyName={companyConfig.companyName}
+        primaryColor={companyConfig.primaryColor}
+      />
+
+      {/* Bottom Navigation with tabs + Menu */}
       <BottomNav
         activeTab={activeTab}
         onChangeTab={(tab) => {
@@ -988,6 +1062,7 @@ export default function App() {
         tripCount={trips.length}
         sellerCount={sellerCount}
         companyConfig={companyConfig}
+        onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
       />
     </div>
   );

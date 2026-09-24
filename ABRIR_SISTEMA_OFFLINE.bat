@@ -1,4 +1,5 @@
 @echo off
+setlocal enabledelayedexpansion
 pushd "%~dp0"
 title OSNIR TURISMO - Sistema de Gestao Offline
 cls
@@ -7,33 +8,55 @@ echo ===========================================================================
 echo            OSNIR TURISMO - SISTEMA DE GESTAO DE VIAGENS
 echo ===============================================================================
 echo.
+echo Verificando arquivos do sistema...
+
+:: Se o index.html compilado nao existir na pasta dist, avisa ou compila
+if not exist "%~dp0dist\index.html" (
+    if exist "%~dp0index.html" (
+        echo [INFO] Compilando arquivos pela primeira vez... Aguarde alguns instantes...
+        call npx vite build
+    )
+)
+
+if not exist "%~dp0dist\index.html" (
+    color 0C
+    echo [ERRO] O arquivo dist\index.html nao foi encontrado.
+    echo Por favor, certifique-se de manter a pasta "dist" junto deste iniciador.
+    pause
+    exit /b 1
+)
+
+echo [OK] Sistema verificado com sucesso!
 echo Iniciando aplicativo em modo desktop offline...
 echo.
 
-:: 1. Tenta abrir no Microsoft Edge em modo Aplicativo Nativo (Janela limpa sem barra de navegacao)
+set "SISTEMA_URL=file:///%~dp0dist/index.html"
+set "CHROME_FLAGS=--allow-file-access-from-files --allow-running-insecure-content --disable-web-security --user-data-dir=\"%temp%\OsnirTurismoBrowserProfile\" --window-size=1280,820"
+
+:: 1. Tenta abrir no Microsoft Edge em modo Aplicativo Nativo
 if exist "%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge.exe" (
-    start "" "%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge.exe" --app="file:///%~dp0dist/index.html" --window-size=1280,800
+    start "" "%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge.exe" --app="%SISTEMA_URL%" %CHROME_FLAGS%
     exit /b 0
 )
 
 if exist "%ProgramFiles%\Microsoft\Edge\Application\msedge.exe" (
-    start "" "%ProgramFiles%\Microsoft\Edge\Application\msedge.exe" --app="file:///%~dp0dist/index.html" --window-size=1280,800
+    start "" "%ProgramFiles%\Microsoft\Edge\Application\msedge.exe" --app="%SISTEMA_URL%" %CHROME_FLAGS%
     exit /b 0
 )
 
 :: 2. Tenta abrir no Google Chrome em modo Aplicativo Nativo
 if exist "%ProgramFiles%\Google\Chrome\Application\chrome.exe" (
-    start "" "%ProgramFiles%\Google\Chrome\Application\chrome.exe" --app="file:///%~dp0dist/index.html" --window-size=1280,800
+    start "" "%ProgramFiles%\Google\Chrome\Application\chrome.exe" --app="%SISTEMA_URL%" %CHROME_FLAGS%
     exit /b 0
 )
 
 if exist "%ProgramFiles(x86)%\Google\Chrome\Application\chrome.exe" (
-    start "" "%ProgramFiles(x86)%\Google\Chrome\Application\chrome.exe" --app="file:///%~dp0dist/index.html" --window-size=1280,800
+    start "" "%ProgramFiles(x86)%\Google\Chrome\Application\chrome.exe" --app="%SISTEMA_URL%" %CHROME_FLAGS%
     exit /b 0
 )
 
 if exist "%LocalAppData%\Google\Chrome\Application\chrome.exe" (
-    start "" "%LocalAppData%\Google\Chrome\Application\chrome.exe" --app="file:///%~dp0dist/index.html" --window-size=1280,800
+    start "" "%LocalAppData%\Google\Chrome\Application\chrome.exe" --app="%SISTEMA_URL%" %CHROME_FLAGS%
     exit /b 0
 )
 

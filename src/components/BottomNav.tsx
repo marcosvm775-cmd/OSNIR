@@ -1,5 +1,5 @@
 import React from 'react';
-import { Users, DollarSign, Car, Compass, CalendarDays, BarChart3, Sliders, Receipt } from 'lucide-react';
+import { Users, DollarSign, Car, Compass, CalendarDays, BarChart3, Sliders, Receipt, Menu } from 'lucide-react';
 import { ActiveTab, CompanyConfig } from '../types';
 
 interface BottomNavProps {
@@ -11,6 +11,7 @@ interface BottomNavProps {
   tripCount?: number;
   sellerCount?: number;
   companyConfig?: CompanyConfig;
+  onOpenMobileMenu?: () => void;
 }
 
 export const BottomNav: React.FC<BottomNavProps> = ({
@@ -21,6 +22,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   dailyCount = 0,
   tripCount = 0,
   companyConfig,
+  onOpenMobileMenu,
 }) => {
   const primaryColor = companyConfig?.primaryColor || '#065f46';
 
@@ -31,6 +33,22 @@ export const BottomNav: React.FC<BottomNavProps> = ({
       className="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t-2 border-slate-200 z-40 shadow-xl pb-safe md:hidden"
     >
       <div className="max-w-xl mx-auto flex items-center justify-between overflow-x-auto scrollbar-none px-1.5 py-1 gap-1">
+        {/* Botão Menu Lateral Esquerdo (Lista de Guias) */}
+        {onOpenMobileMenu && (
+          <button
+            id="nav-tab-side-menu"
+            type="button"
+            onClick={onOpenMobileMenu}
+            className="flex-1 min-w-[46px] py-1 flex flex-col items-center justify-center relative transition-all cursor-pointer rounded-xl border border-slate-200/80 bg-slate-50 hover:bg-slate-100 active:scale-95 text-slate-800 font-extrabold shadow-2xs"
+            title="Abrir Menu de Guias Lateral em Lista"
+          >
+            <div className="relative">
+              <Menu className="w-4 h-4 text-emerald-800" />
+            </div>
+            <span className="text-[9px] mt-0.5 whitespace-nowrap font-black text-emerald-800">Menu</span>
+          </button>
+        )}
+
         {/* Tab 1: Clientes (Lista Geral) */}
         <button
           id="nav-tab-passengers"

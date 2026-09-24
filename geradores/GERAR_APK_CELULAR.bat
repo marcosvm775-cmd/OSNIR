@@ -1,4 +1,7 @@
 @echo off
+setlocal enabledelayedexpansion
+pushd "%~dp0.."
+set "RAIZ=%CD%"
 title GERADOR OFICIAL DO APK - OSNIR TURISMO
 color 0A
 cls
@@ -46,17 +49,15 @@ if "%JAVA_USAR%"=="" if exist "%ProgramFiles%\Eclipse Adoptium" (
 
 if "%JAVA_USAR%"=="" (
     color 0C
-    echo [ERRO] Java 17 nao foi localizado nas pastas do Windows.
-    echo Se voce acabou de rodar o INSTALAR_JAVA_17_AUTOMATICO.bat, confirme se ele terminou.
+    echo [ERRO] Java 17 nao foi encontrado automaticamente.
+    echo Por favor, execute o arquivo INSTALAR_JAVA_17_AUTOMATICO.bat nesta pasta.
     echo.
     pause
-    goto fim
+    popd
+    exit /b 1
 )
 
-echo [OK] Java localizado com sucesso em:
-echo      "%JAVA_USAR%"
-echo.
-"%JAVA_USAR%\bin\java.exe" -version
+echo [OK] Java 17 localizado em: "%JAVA_USAR%"
 echo.
 
 set "JAVA_HOME=%JAVA_USAR%"
@@ -80,38 +81,66 @@ if not exist "%LOCAL_SDK%\licenses" mkdir "%LOCAL_SDK%\licenses"
 >> "%LOCAL_SDK%\licenses\android-sdk-license" echo d56f5187479451eabf01fb78af6dfcb131a6481e
 > "%LOCAL_SDK%\licenses\android-sdk-preview-license" echo 8564bc6a22f0579eabb74f91fa20c603b6d86fb0
 
-if not exist "%~dp0android\licenses" mkdir "%~dp0android\licenses"
-copy /y "%LOCAL_SDK%\licenses\*.*" "%~dp0android\licenses\" >nul 2>&1
+if not exist "%RAIZ%\android\licenses" mkdir "%RAIZ%\android\licenses"
+copy /y "%LOCAL_SDK%\licenses\*.*" "%RAIZ%\android\licenses\" >nul 2>&1
 
 set "FORMATO_SDK=%LOCAL_SDK:\=/%"
-echo sdk.dir=%FORMATO_SDK%> "%~dp0android\local.properties"
+echo sdk.dir=%FORMATO_SDK%> "%RAIZ%\android\local.properties"
 
 echo.
-echo 3. Compilando o APK (Isso leva de 1 a 2 minutos)...
+echo 3. Verificando arquivos do aplicativo...
+if not exist "%RAIZ%\android\app\src\main\res\values\colors.xml" (
+    (
+        echo ^<?xml version="1.0" encoding="utf-8"?^>
+        echo ^<resources^>
+        echo     ^<color name="colorPrimary"^>#065f46^</color^>
+        echo     ^<color name="colorPrimaryDark"^>#044e3a^</color^>
+        echo     ^<color name="colorAccent"^>#10b981^</color^>
+        echo ^</resources^>
+    ) > "%RAIZ%\android\app\src\main\res\values\colors.xml"
+)
+(
+    echo include ':capacitor-android'
+    echo if ^(new File^('./capacitor-android/src/main/java'^).exists^(^)^) ^{
+    echo     project^(':capacitor-android'^).projectDir = new File^('./capacitor-android'^)
+    echo ^} else if ^(new File^('../node_modules/@capacitor/android/capacitor'^).exists^(^)^) ^{
+    echo     project^(':capacitor-android'^).projectDir = new File^('../node_modules/@capacitor/android/capacitor'^)
+    echo ^} else ^{
+    echo     project^(':capacitor-android'^).projectDir = new File^('./capacitor-android'^)
+    echo ^}
+) > "%RAIZ%\android\capacitor.settings.gradle"
+
+if exist "%RAIZ%\dist\index.html" (
+    xcopy /e /y /q "%RAIZ%\dist\*" "%RAIZ%\android\app\src\main\assets\public\" >nul 2>&1
+)
+echo [OK] Recursos do aplicativo prontos com a versao mais recente!
+
+echo.
+echo 4. Compilando o APK (Isso leva de 1 a 2 minutos)...
 echo    Aguarde enquanto o Gradle gera o pacote do aplicativo...
 echo -------------------------------------------------------------------------------
 
-cd /d "%~dp0android"
-call gradlew.bat assembleDebug assembleRelease --stacktrace > "%~dp0relatorio_erro_apk.txt" 2>&1
+cd /d "%RAIZ%\android"
+call gradlew.bat assembleDebug assembleRelease --stacktrace > "%RAIZ%\relatorio_erro_apk.txt" 2>&1
 set "GRADLE_STATUS=%ERRORLEVEL%"
-cd /d "%~dp0"
+cd /d "%RAIZ%"
 
 echo.
 echo -------------------------------------------------------------------------------
 echo Codigo de retorno da compilacao: %GRADLE_STATUS%
 echo -------------------------------------------------------------------------------
 echo.
-set "DESTINO=%~dp0SEU_APK_AQUI"
+set "DESTINO=%RAIZ%\SEU_APK_AQUI"
 
 set "APK_ORIGEM="
-if exist "%~dp0android\app\build\outputs\apk\debug\app-debug.apk" (
-    set "APK_ORIGEM=%~dp0android\app\build\outputs\apk\debug\app-debug.apk"
+if exist "%RAIZ%\android\app\build\outputs\apk\debug\app-debug.apk" (
+    set "APK_ORIGEM=%RAIZ%\android\app\build\outputs\apk\debug\app-debug.apk"
 )
-if "%APK_ORIGEM%"=="" if exist "%~dp0android\app\build\outputs\apk\release\app-release.apk" (
-    set "APK_ORIGEM=%~dp0android\app\build\outputs\apk\release\app-release.apk"
+if "%APK_ORIGEM%"=="" if exist "%RAIZ%\android\app\build\outputs\apk\release\app-release.apk" (
+    set "APK_ORIGEM=%RAIZ%\android\app\build\outputs\apk\release\app-release.apk"
 )
-if "%APK_ORIGEM%"=="" if exist "%~dp0android\app\build\outputs\apk\release\app-release-unsigned.apk" (
-    set "APK_ORIGEM=%~dp0android\app\build\outputs\apk\release\app-release-unsigned.apk"
+if "%APK_ORIGEM%"=="" if exist "%RAIZ%\android\app\build\outputs\apk\release\app-release-unsigned.apk" (
+    set "APK_ORIGEM=%RAIZ%\android\app\build\outputs\apk\release\app-release-unsigned.apk"
 )
 
 if not "%APK_ORIGEM%"=="" (
@@ -138,12 +167,12 @@ if not "%APK_ORIGEM%"=="" (
     echo.
     echo Veja abaixo o erro que o sistema relatou:
     echo -------------------------------------------------------------------------------
-    if exist "%~dp0relatorio_erro_apk.txt" (
-        type "%~dp0relatorio_erro_apk.txt"
+    if exist "%RAIZ%\relatorio_erro_apk.txt" (
+        type "%RAIZ%\relatorio_erro_apk.txt"
         echo -------------------------------------------------------------------------------
         echo.
         echo Abrindo o relatorio completo no Bloco de Notas para facilitar...
-        start "" notepad "%~dp0relatorio_erro_apk.txt"
+        start "" notepad "%RAIZ%\relatorio_erro_apk.txt"
     ) else (
         echo Nao foi possivel ler o relatorio.
     )
@@ -153,4 +182,5 @@ if not "%APK_ORIGEM%"=="" (
 echo.
 echo Pressione qualquer tecla para fechar esta janela.
 pause >nul
+popd
 exit /b 0
