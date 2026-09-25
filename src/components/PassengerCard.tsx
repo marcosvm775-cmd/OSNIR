@@ -222,7 +222,7 @@ export const PassengerCard: React.FC<PassengerCardProps> = ({
               className="font-bold text-slate-900 truncate block w-full text-left hover:text-emerald-700 hover:underline cursor-pointer text-xs"
               title="Clique para alterar a cidade de origem"
             >
-              {passenger.origin}
+              {passenger.origin?.trim() || <span className="text-slate-400 font-normal italic">A definir</span>}
             </button>
           )}
         </div>
@@ -287,7 +287,7 @@ export const PassengerCard: React.FC<PassengerCardProps> = ({
               className="font-bold text-rose-950 truncate block w-full text-left hover:text-rose-700 hover:underline cursor-pointer text-xs"
               title="Clique para alterar a cidade de destino"
             >
-              {passenger.destination}
+              {passenger.destination?.trim() || <span className="text-slate-400 font-normal italic">A definir</span>}
             </button>
           )}
         </div>

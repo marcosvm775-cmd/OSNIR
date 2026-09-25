@@ -42,6 +42,8 @@ interface DailyListManagerProps {
   onSaveNewPassengerAndAddToDaily: (newPassenger: Passenger) => void;
   onUpdatePassengerDriver: (passengerId: string, driverId: string) => void;
   onUpdatePassengerSeller?: (passengerId: string, newSeller: string) => void;
+  onUpdatePassengerOrigin?: (passengerId: string, newOrigin: string) => void;
+  onUpdatePassengerDestination?: (passengerId: string, newDestination: string) => void;
   companyConfig?: CompanyConfig;
 }
 
@@ -58,6 +60,8 @@ export const DailyListManager: React.FC<DailyListManagerProps> = ({
   onSaveNewPassengerAndAddToDaily,
   onUpdatePassengerDriver,
   onUpdatePassengerSeller,
+  onUpdatePassengerOrigin,
+  onUpdatePassengerDestination,
   companyConfig,
 }) => {
   // Modals state
@@ -65,6 +69,13 @@ export const DailyListManager: React.FC<DailyListManagerProps> = ({
   const [isNewClientModalOpen, setIsNewClientModalOpen] = useState(false);
   const [isConfirmClearOpen, setIsConfirmClearOpen] = useState(false);
   const [passengerToRemove, setPassengerToRemove] = useState<Passenger | null>(null);
+
+  // Route alteration state (Origin and Destination editing in Daily List)
+  const [routeEditPassenger, setRouteEditPassenger] = useState<Passenger | null>(null);
+  const [routeOriginInput, setRouteOriginInput] = useState('');
+  const [routeDestinationInput, setRouteDestinationInput] = useState('');
+  const [routeError, setRouteError] = useState<string | null>(null);
+  const [isPullingAfterRouteEdit, setIsPullingAfterRouteEdit] = useState(false);
 
   // Seller alteration state (when pulling or updating)
   const [sellerEditPassenger, setSellerEditPassenger] = useState<Passenger | null>(null);
@@ -209,6 +220,48 @@ export const DailyListManager: React.FC<DailyListManagerProps> = ({
     setAutoPulledNoticeModal(`Dados de "${match.fullName}" puxados automaticamente da base de dados!`);
   };
 
+  // Open route editor modal (Origin and Destination for Daily List)
+  const openRouteEditor = (passenger: Passenger, andPull: boolean = false) => {
+    setRouteEditPassenger(passenger);
+    setIsPullingAfterRouteEdit(andPull);
+    setRouteOriginInput(passenger.origin || '');
+    setRouteDestinationInput(passenger.destination || '');
+    setRouteError(null);
+  };
+
+  // Save route alteration
+  const handleSaveRouteEdit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!routeEditPassenger) return;
+
+    const origin = routeOriginInput.trim().toUpperCase();
+    const dest = routeDestinationInput.trim().toUpperCase();
+
+    if (!origin) {
+      setRouteError('Na Lista do Dia, a Cidade de Origem é obrigatória.');
+      return;
+    }
+    if (!dest) {
+      setRouteError('Na Lista do Dia, a Cidade de Destino é obrigatória.');
+      return;
+    }
+
+    if (onUpdatePassengerOrigin) {
+      onUpdatePassengerOrigin(routeEditPassenger.id, origin);
+    }
+    if (onUpdatePassengerDestination) {
+      onUpdatePassengerDestination(routeEditPassenger.id, dest);
+    }
+
+    if (isPullingAfterRouteEdit) {
+      onAddPassengerToDaily(routeEditPassenger.id);
+    }
+
+    setRouteEditPassenger(null);
+    setIsPullingAfterRouteEdit(false);
+    setRouteError(null);
+  };
+
   // Open seller editor modal
   const openSellerEditor = (passenger: Passenger, andPull: boolean = false) => {
     setSellerEditPassenger(passenger);
@@ -228,6 +281,15 @@ export const DailyListManager: React.FC<DailyListManagerProps> = ({
     }
 
     if (isPullingAfterSellerEdit) {
+      // Se não tiver cidade de origem ou destino, abre o editor de rota obrigatório da Lista do Dia
+      if (!sellerEditPassenger.origin?.trim() || !sellerEditPassenger.destination?.trim()) {
+        const passengerRef = sellerEditPassenger;
+        setSellerEditPassenger(null);
+        setIsPullingAfterSellerEdit(false);
+        setCustomSellerInput('');
+        openRouteEditor(passengerRef, true);
+        return;
+      }
       onAddPassengerToDaily(sellerEditPassenger.id, newSeller);
     }
 
@@ -254,6 +316,12 @@ export const DailyListManager: React.FC<DailyListManagerProps> = ({
 
   // Handler to directly pull existing customer into today's list
   const handleDirectPullMatch = (match: Passenger) => {
+    // Na Lista do Dia: Origem e Destino são obrigatórios!
+    if (!match.origin?.trim() || !match.destination?.trim()) {
+      handleAutoFillFromMatch(match);
+      setFormError('Na Lista do Dia é obrigatório definir Cidade de Origem e de Destino. Preencha os campos destacados abaixo.');
+      return;
+    }
     onAddPassengerToDaily(match.id);
     setIsNewClientModalOpen(false);
     setIsModalSuggestionsOpen(false);
@@ -316,16 +384,13 @@ export const DailyListManager: React.FC<DailyListManagerProps> = ({
       setFormError('Informe o nome completo do cliente.');
       return;
     }
+    // Na Lista do Dia: EXIGIR apenas Origem e Destino (Vendedor e Motorista são opcionais)
     if (!origin) {
-      setFormError('Informe a origem da viagem.');
+      setFormError('Na Lista do Dia é obrigatório informar a Cidade de Origem.');
       return;
     }
     if (!dest) {
-      setFormError('Informe o destino da viagem.');
-      return;
-    }
-    if (!seller) {
-      setFormError('Informe o vendedor responsável.');
+      setFormError('Na Lista do Dia é obrigatório informar a Cidade de Destino.');
       return;
     }
 
@@ -334,8 +399,8 @@ export const DailyListManager: React.FC<DailyListManagerProps> = ({
       fullName: name.toUpperCase(),
       origin: origin.toUpperCase(),
       destination: dest.toUpperCase(),
-      seller: seller.toUpperCase(),
-      driverId: newDriverId,
+      seller: seller ? seller.toUpperCase() : 'BALCÃO',
+      driverId: newDriverId || '',
       createdAt: new Date().toISOString(),
     };
 
@@ -629,23 +694,43 @@ export const DailyListManager: React.FC<DailyListManagerProps> = ({
 
                   {/* Badges / Chips Row */}
                   <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 w-full md:w-auto">
-                    {/* Campo 1: Cidade de Origem */}
-                    <div className="flex items-center gap-1 shrink-0 bg-emerald-50/60 border border-emerald-300 px-2 py-0.5 rounded-lg text-[11px] shadow-2xs max-w-[calc(50%-4px)] sm:max-w-none">
+                    {/* Campo 1: Cidade de Origem (Obrigatório na Lista do Dia) */}
+                    <button
+                      type="button"
+                      onClick={() => openRouteEditor(passenger)}
+                      className={`flex items-center gap-1 shrink-0 px-2 py-0.5 rounded-lg text-[11px] shadow-2xs max-w-[calc(50%-4px)] sm:max-w-none transition cursor-pointer ${
+                        passenger.origin?.trim()
+                          ? 'bg-emerald-50/70 border border-emerald-300 hover:bg-emerald-100 text-emerald-900'
+                          : 'bg-rose-50 border-2 border-rose-400 hover:bg-rose-100 text-rose-800 animate-pulse'
+                      }`}
+                      title="Clique para alterar ou preencher a Cidade de Origem (obrigatória na Lista do Dia)"
+                    >
                       <MapPin className="w-3 h-3 text-emerald-700 shrink-0" />
-                      <span className="text-[10px] font-extrabold text-emerald-800 uppercase tracking-tight shrink-0">Orig:</span>
-                      <span className="font-bold text-slate-800 truncate" title={passenger.origin}>
-                        {passenger.origin}
+                      <span className="text-[10px] font-extrabold uppercase tracking-tight shrink-0">Orig:</span>
+                      <span className="font-bold truncate max-w-[90px] sm:max-w-none" title={passenger.origin || 'Definir Origem'}>
+                        {passenger.origin?.trim() || 'Definir *'}
                       </span>
-                    </div>
+                      <Edit3 className="w-2.5 h-2.5 opacity-60 shrink-0 ml-0.5" />
+                    </button>
 
-                    {/* Campo 2: Cidade de Destino */}
-                    <div className="flex items-center gap-1 shrink-0 bg-rose-50/60 border border-rose-300 px-2 py-0.5 rounded-lg text-[11px] shadow-2xs max-w-[calc(50%-4px)] sm:max-w-none">
+                    {/* Campo 2: Cidade de Destino (Obrigatório na Lista do Dia) */}
+                    <button
+                      type="button"
+                      onClick={() => openRouteEditor(passenger)}
+                      className={`flex items-center gap-1 shrink-0 px-2 py-0.5 rounded-lg text-[11px] shadow-2xs max-w-[calc(50%-4px)] sm:max-w-none transition cursor-pointer ${
+                        passenger.destination?.trim()
+                          ? 'bg-rose-50/70 border border-rose-300 hover:bg-rose-100 text-rose-950'
+                          : 'bg-rose-50 border-2 border-rose-400 hover:bg-rose-100 text-rose-800 animate-pulse'
+                      }`}
+                      title="Clique para alterar ou preencher a Cidade de Destino (obrigatória na Lista do Dia)"
+                    >
                       <Flag className="w-3 h-3 text-rose-600 shrink-0" />
-                      <span className="text-[10px] font-extrabold text-rose-800 uppercase tracking-tight shrink-0">Dest:</span>
-                      <span className="font-bold text-rose-950 truncate" title={passenger.destination}>
-                        {passenger.destination}
+                      <span className="text-[10px] font-extrabold uppercase tracking-tight shrink-0">Dest:</span>
+                      <span className="font-bold truncate max-w-[90px] sm:max-w-none" title={passenger.destination || 'Definir Destino'}>
+                        {passenger.destination?.trim() || 'Definir *'}
                       </span>
-                    </div>
+                      <Edit3 className="w-2.5 h-2.5 opacity-60 shrink-0 ml-0.5" />
+                    </button>
 
                     {/* Seller with quick edit */}
                     <button
@@ -706,27 +791,51 @@ export const DailyListManager: React.FC<DailyListManagerProps> = ({
                           <h4 className="text-xs sm:text-sm font-bold text-slate-900 truncate">
                             {passenger.fullName}
                           </h4>
-                          {/* Campos Separados: Origem e Destino */}
+                          {/* Campos Separados: Origem e Destino (Obrigatórios na Lista do Dia) */}
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
-                            <div className="p-2 bg-emerald-50/50 rounded-xl border-2 border-emerald-300/80 shadow-2xs">
-                              <div className="flex items-center gap-1 text-emerald-800 text-[10px] font-extrabold uppercase tracking-tight">
-                                <MapPin className="w-3 h-3 text-emerald-700 shrink-0" />
-                                <span>Cidade de Origem</span>
+                            <button
+                              type="button"
+                              onClick={() => openRouteEditor(passenger)}
+                              className={`p-2 rounded-xl border-2 shadow-2xs text-left transition cursor-pointer group ${
+                                passenger.origin?.trim()
+                                  ? 'bg-emerald-50/50 hover:bg-emerald-100/70 border-emerald-300/80'
+                                  : 'bg-rose-50 border-rose-400 animate-pulse'
+                              }`}
+                              title="Clique para alterar ou preencher a Cidade de Origem"
+                            >
+                              <div className="flex items-center justify-between text-[10px] font-extrabold uppercase tracking-tight text-emerald-800">
+                                <div className="flex items-center gap-1">
+                                  <MapPin className="w-3 h-3 text-emerald-700 shrink-0" />
+                                  <span>Cidade de Origem</span>
+                                </div>
+                                <Edit3 className="w-2.5 h-2.5 opacity-60 group-hover:opacity-100" />
                               </div>
-                              <span className="font-bold text-slate-800 text-xs block truncate mt-0.5" title={passenger.origin}>
-                                {passenger.origin}
+                              <span className="font-bold text-slate-800 text-xs block truncate mt-0.5" title={passenger.origin || 'Definir Origem'}>
+                                {passenger.origin?.trim() || <span className="text-rose-700 font-bold">Definir *</span>}
                               </span>
-                            </div>
+                            </button>
 
-                            <div className="p-2 bg-rose-50/50 rounded-xl border-2 border-rose-300/80 shadow-2xs">
-                              <div className="flex items-center gap-1 text-rose-800 text-[10px] font-extrabold uppercase tracking-tight">
-                                <Flag className="w-3 h-3 text-rose-600 shrink-0" />
-                                <span>Cidade de Destino</span>
+                            <button
+                              type="button"
+                              onClick={() => openRouteEditor(passenger)}
+                              className={`p-2 rounded-xl border-2 shadow-2xs text-left transition cursor-pointer group ${
+                                passenger.destination?.trim()
+                                  ? 'bg-rose-50/50 hover:bg-rose-100/70 border-rose-300/80'
+                                  : 'bg-rose-50 border-rose-400 animate-pulse'
+                              }`}
+                              title="Clique para alterar ou preencher a Cidade de Destino"
+                            >
+                              <div className="flex items-center justify-between text-[10px] font-extrabold uppercase tracking-tight text-rose-800">
+                                <div className="flex items-center gap-1">
+                                  <Flag className="w-3 h-3 text-rose-600 shrink-0" />
+                                  <span>Cidade de Destino</span>
+                                </div>
+                                <Edit3 className="w-2.5 h-2.5 opacity-60 group-hover:opacity-100" />
                               </div>
-                              <span className="font-bold text-rose-950 text-xs block truncate mt-0.5" title={passenger.destination}>
-                                {passenger.destination}
+                              <span className="font-bold text-rose-950 text-xs block truncate mt-0.5" title={passenger.destination || 'Definir Destino'}>
+                                {passenger.destination?.trim() || <span className="text-rose-700 font-bold">Definir *</span>}
                               </span>
-                            </div>
+                            </button>
                           </div>
                         </div>
                       </div>
@@ -934,10 +1043,15 @@ export const DailyListManager: React.FC<DailyListManagerProps> = ({
                               type="button"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                onAddPassengerToDaily(p.id);
+                                if (!p.origin?.trim() || !p.destination?.trim()) {
+                                  setIsPullModalOpen(false);
+                                  openRouteEditor(p, true);
+                                } else {
+                                  onAddPassengerToDaily(p.id);
+                                }
                               }}
                               className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg shadow-2xs transition active:scale-95 cursor-pointer"
-                              title="Puxar mantendo o vendedor atual"
+                              title="Puxar para a Lista do Dia (exige Origem e Destino)"
                             >
                               <Plus className="w-3 h-3" />
                               <span>Puxar</span>
@@ -1004,16 +1118,16 @@ export const DailyListManager: React.FC<DailyListManagerProps> = ({
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-slate-900">
-                    Cadastrar Novo Cliente
+                    Cadastrar Novo Cliente na Lista do Dia
                   </h3>
                   <p className="text-xs text-slate-500">
-                    Adiciona à Lista do Dia e salva na Lista Geral permanente
+                    Exigidos: Nome Completo, Origem e Destino • Vendedor e Motorista opcionais
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setIsNewClientModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100"
+                className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1025,7 +1139,7 @@ export const DailyListManager: React.FC<DailyListManagerProps> = ({
               <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex items-start gap-2 text-emerald-900">
                 <Sparkles className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
                 <p className="text-[11px] leading-relaxed">
-                  <strong>Alimentação contínua do sistema:</strong> Este novo cliente será automaticamente cadastrado na <strong>Lista Geral</strong> para futuras viagens e consultas, além de ser adicionado à <strong>Lista do Dia ({selectedDate})</strong>.
+                  <strong>Requisitos da Lista do Dia:</strong> É obrigatório informar o <strong>Nome Completo</strong>, a <strong>Cidade de Origem</strong> e a <strong>Cidade de Destino</strong> para a rota do dia. <strong>Vendedor</strong> e <strong>Motorista</strong> são opcionais. Este cliente também será salvo na <strong>Lista Geral</strong>.
                 </p>
               </div>
 
@@ -1056,19 +1170,25 @@ export const DailyListManager: React.FC<DailyListManagerProps> = ({
               {/* Nome Completo com Busca Flutuante e Detecção Automática na Base */}
               <div className="space-y-1 relative" ref={modalSuggestionsRef}>
                 <div className="flex items-center justify-between">
-                  <label className="block font-bold text-slate-700">
-                    Nome Completo do Cliente *
+                  <label className="flex items-center gap-1.5 font-bold text-slate-700">
+                    <span>Nome Completo do Cliente *</span>
                   </label>
-                  <span className="text-[10px] text-slate-400 flex items-center gap-1">
-                    <Database className="w-3 h-3 text-emerald-600" />
-                    <span>Busca automática na base</span>
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-bold px-1.5 py-0.2 bg-emerald-100 text-emerald-800 rounded">
+                      Obrigatório
+                    </span>
+                    <span className="text-[10px] text-slate-400 hidden sm:flex items-center gap-1">
+                      <Database className="w-3 h-3 text-emerald-600" />
+                      <span>Busca na base</span>
+                    </span>
+                  </div>
                 </div>
 
                 <div className="relative">
                   <input
                     type="text"
-                    placeholder="Digite o nome (ex: Carlos Eduardo)..."
+                    required
+                    placeholder="Digite o nome completo do cliente..."
                     value={newFullName}
                     onFocus={() => setIsModalSuggestionsOpen(true)}
                     onChange={(e) => {
@@ -1076,7 +1196,7 @@ export const DailyListManager: React.FC<DailyListManagerProps> = ({
                       setIsModalSuggestionsOpen(true);
                       setAutoPulledNoticeModal(null);
                     }}
-                    className="w-full pl-3 pr-8 py-2 bg-white border border-slate-300 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-emerald-600 text-xs text-slate-900"
+                    className="w-full pl-3 pr-8 py-2 bg-white border border-slate-300 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-emerald-600 text-xs text-slate-900 font-semibold"
                     autoFocus
                     autoComplete="off"
                   />
@@ -1212,15 +1332,21 @@ export const DailyListManager: React.FC<DailyListManagerProps> = ({
                 )}
               </div>
 
-              {/* Campos Separados: Cidade de Origem e Cidade de Destino */}
+              {/* Campos Separados: Cidade de Origem e Cidade de Destino (Exigidos na Lista do Dia) */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="space-y-1 p-2.5 bg-emerald-50/30 rounded-xl border-2 border-emerald-200">
-                  <label className="flex items-center gap-1 text-xs font-bold text-emerald-900">
-                    <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                    <span>Cidade de Origem *</span>
-                  </label>
+                <div className="space-y-1 p-2.5 bg-emerald-50/30 rounded-xl border-2 border-emerald-300">
+                  <div className="flex items-center justify-between">
+                    <label className="flex items-center gap-1 text-xs font-bold text-emerald-900">
+                      <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                      <span>Cidade de Origem *</span>
+                    </label>
+                    <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100 px-1.5 py-0.2 rounded">
+                      Obrigatório
+                    </span>
+                  </div>
                   <input
                     type="text"
+                    required
                     placeholder="Ex: São Paulo"
                     value={newOrigin}
                     onChange={(e) => setNewOrigin(e.target.value)}
@@ -1242,13 +1368,19 @@ export const DailyListManager: React.FC<DailyListManagerProps> = ({
                   )}
                 </div>
 
-                <div className="space-y-1 p-2.5 bg-rose-50/30 rounded-xl border-2 border-rose-200">
-                  <label className="flex items-center gap-1 text-xs font-bold text-rose-900">
-                    <Flag className="w-3.5 h-3.5 text-rose-600 shrink-0" />
-                    <span>Cidade de Destino *</span>
-                  </label>
+                <div className="space-y-1 p-2.5 bg-rose-50/30 rounded-xl border-2 border-rose-300">
+                  <div className="flex items-center justify-between">
+                    <label className="flex items-center gap-1 text-xs font-bold text-rose-900">
+                      <Flag className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                      <span>Cidade de Destino *</span>
+                    </label>
+                    <span className="text-[10px] font-bold text-rose-800 bg-rose-100 px-1.5 py-0.2 rounded">
+                      Obrigatório
+                    </span>
+                  </div>
                   <input
                     type="text"
+                    required
                     placeholder="Ex: Rio de Janeiro"
                     value={newDestination}
                     onChange={(e) => setNewDestination(e.target.value)}
@@ -1271,13 +1403,16 @@ export const DailyListManager: React.FC<DailyListManagerProps> = ({
                 </div>
               </div>
 
-              {/* Vendedor e Motorista */}
+              {/* Vendedor e Motorista (Opcionais na Lista do Dia) */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="block font-bold text-slate-700">Vendedor *</label>
+                  <div className="flex items-center justify-between">
+                    <label className="block font-bold text-slate-700">Vendedor</label>
+                    <span className="text-[10px] text-slate-500 font-medium">Opcional (Padrão: BALCÃO)</span>
+                  </div>
                   <input
                     type="text"
-                    placeholder="Ex: Carlos"
+                    placeholder="Ex: Carlos (Opcional)"
                     value={newSeller}
                     onChange={(e) => setNewSeller(e.target.value)}
                     className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-emerald-600 text-xs text-slate-900"
@@ -1299,13 +1434,16 @@ export const DailyListManager: React.FC<DailyListManagerProps> = ({
                 </div>
 
                 <div className="space-y-1">
-                  <label className="block font-bold text-slate-700">Motorista (Opcional)</label>
+                  <div className="flex items-center justify-between">
+                    <label className="block font-bold text-slate-700">Motorista</label>
+                    <span className="text-[10px] text-slate-500 font-medium">Opcional</span>
+                  </div>
                   <select
                     value={newDriverId}
                     onChange={(e) => setNewDriverId(e.target.value)}
                     className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-emerald-600 text-xs text-slate-900 cursor-pointer"
                   >
-                    <option value="">A definir</option>
+                    <option value="">A definir (Opcional)</option>
                     {drivers.map((d) => (
                       <option key={d.id} value={d.id}>
                         {d.fullName}
@@ -1593,6 +1731,161 @@ export const DailyListManager: React.FC<DailyListManagerProps> = ({
                       ? 'Confirmar e Puxar com Este Vendedor'
                       : 'Salvar Novo Vendedor'}
                   </span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 5B: ALTERAR TRAJETO (CIDADE DE ORIGEM E DESTINO NA LISTA DO DIA)    */}
+      {/* ========================================================================= */}
+      {routeEditPassenger && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl max-w-md w-full p-5 shadow-2xl border border-slate-200 space-y-4">
+            {/* Header */}
+            <div className="flex items-start justify-between gap-2 border-b border-slate-100 pb-3">
+              <div className="flex items-center space-x-2.5">
+                <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
+                  <MapPin className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">
+                    Definir Trajeto da Viagem
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Origem e Destino são obrigatórios na Lista do Dia
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setRouteEditPassenger(null);
+                  setRouteError(null);
+                }}
+                className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Error banner if any */}
+            {routeError && (
+              <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                <span>{routeError}</span>
+              </div>
+            )}
+
+            {/* Passenger Info Summary Box */}
+            <div className="bg-slate-50 rounded-xl p-3 border border-slate-200 space-y-1.5 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-slate-500 font-medium">Cliente:</span>
+                <span className="font-bold text-slate-900 truncate max-w-[200px]">
+                  {routeEditPassenger.fullName}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-slate-500 font-medium">Vendedor:</span>
+                <span className="font-semibold text-slate-800">
+                  {routeEditPassenger.seller || 'BALCÃO'}
+                </span>
+              </div>
+            </div>
+
+            {/* Route Form */}
+            <form onSubmit={handleSaveRouteEdit} className="space-y-3">
+              {/* Origem */}
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-emerald-950 flex items-center gap-1">
+                    <MapPin className="w-3.5 h-3.5 text-emerald-700" />
+                    <span>Cidade de Origem *</span>
+                  </label>
+                  <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100 px-1.5 py-0.2 rounded">
+                    Obrigatório
+                  </span>
+                </div>
+                <input
+                  type="text"
+                  required
+                  value={routeOriginInput}
+                  onChange={(e) => setRouteOriginInput(e.target.value.toUpperCase())}
+                  placeholder="Ex: São Paulo"
+                  autoFocus
+                  className="w-full px-3 py-2 text-xs font-semibold bg-white border border-slate-300 rounded-xl focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 uppercase transition"
+                />
+                {suggestedOrigins.length > 0 && (
+                  <div className="flex flex-wrap gap-1 pt-0.5">
+                    {suggestedOrigins.slice(0, 3).map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => setRouteOriginInput(s)}
+                        className="px-1.5 py-0.5 bg-slate-100 hover:bg-emerald-100 text-slate-700 rounded text-[10px] cursor-pointer"
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Destino */}
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-rose-950 flex items-center gap-1">
+                    <Flag className="w-3.5 h-3.5 text-rose-600" />
+                    <span>Cidade de Destino *</span>
+                  </label>
+                  <span className="text-[10px] font-bold text-rose-800 bg-rose-100 px-1.5 py-0.2 rounded">
+                    Obrigatório
+                  </span>
+                </div>
+                <input
+                  type="text"
+                  required
+                  value={routeDestinationInput}
+                  onChange={(e) => setRouteDestinationInput(e.target.value.toUpperCase())}
+                  placeholder="Ex: Rio de Janeiro"
+                  className="w-full px-3 py-2 text-xs font-semibold bg-white border border-slate-300 rounded-xl focus:border-rose-600 focus:ring-1 focus:ring-rose-600 uppercase transition"
+                />
+                {suggestedDestinations.length > 0 && (
+                  <div className="flex flex-wrap gap-1 pt-0.5">
+                    {suggestedDestinations.slice(0, 3).map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => setRouteDestinationInput(s)}
+                        className="px-1.5 py-0.5 bg-slate-100 hover:bg-rose-100 text-slate-700 rounded text-[10px] cursor-pointer"
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRouteEditPassenger(null);
+                    setRouteError(null);
+                  }}
+                  className="px-3.5 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 text-xs font-bold bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl shadow-xs transition active:scale-95 cursor-pointer inline-flex items-center gap-1.5"
+                >
+                  <Check className="w-4 h-4" />
+                  <span>Salvar Trajeto</span>
                 </button>
               </div>
             </form>

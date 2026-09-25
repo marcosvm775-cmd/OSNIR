@@ -120,16 +120,16 @@ export default function App() {
 
   // Atualiza dinamicamente o título e o ícone da aba/aplicativo com a logo e nome personalizados
   useEffect(() => {
-    if (companyConfig.companyName) {
+    if (companyConfig?.companyName) {
       document.title = companyConfig.companyName;
     }
-    if (companyConfig.logoUrl) {
+    if (companyConfig?.logoUrl) {
       const favicons = document.querySelectorAll("link[rel*='icon'], link[rel='apple-touch-icon']");
       favicons.forEach((el) => {
         (el as HTMLLinkElement).href = companyConfig.logoUrl;
       });
     }
-  }, [companyConfig.companyName, companyConfig.logoUrl]);
+  }, [companyConfig?.companyName, companyConfig?.logoUrl]);
 
   const handleSaveCompanyConfig = (newConfig: CompanyConfig) => {
     setCompanyConfig(newConfig);
@@ -459,12 +459,12 @@ export default function App() {
       // Search query (matches name, origin, destination, seller, or driver name)
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
-        const matchesName = p.fullName.toLowerCase().includes(q);
-        const matchesOrigin = p.origin.toLowerCase().includes(q);
-        const matchesDestination = p.destination.toLowerCase().includes(q);
-        const matchesSeller = p.seller.toLowerCase().includes(q);
+        const matchesName = (p.fullName || '').toLowerCase().includes(q);
+        const matchesOrigin = (p.origin || '').toLowerCase().includes(q);
+        const matchesDestination = (p.destination || '').toLowerCase().includes(q);
+        const matchesSeller = (p.seller || '').toLowerCase().includes(q);
         const assignedDriver = drivers.find((d) => d.id === p.driverId);
-        const matchesDriver = assignedDriver ? assignedDriver.fullName.toLowerCase().includes(q) : false;
+        const matchesDriver = assignedDriver ? (assignedDriver.fullName || '').toLowerCase().includes(q) : false;
 
         return matchesName || matchesOrigin || matchesDestination || matchesSeller || matchesDriver;
       }
@@ -811,7 +811,7 @@ export default function App() {
           </div>
         )}
 
-        {/* TAB 2: LISTA DO DIA (NOVA GUIA SOLICITADA) */}
+        {/* TAB 2: LISTA DO DIA */}
         {activeTab === 'daily-list' && (
           <DailyListManager
             passengers={passengers}
@@ -826,6 +826,8 @@ export default function App() {
             onSaveNewPassengerAndAddToDaily={handleSaveNewPassengerAndAddToDaily}
             onUpdatePassengerDriver={handleAllocateDriver}
             onUpdatePassengerSeller={handleUpdatePassengerSeller}
+            onUpdatePassengerOrigin={handleUpdateOrigin}
+            onUpdatePassengerDestination={handleUpdateDestination}
             companyConfig={companyConfig}
           />
         )}
@@ -884,16 +886,19 @@ export default function App() {
             />
 
             {/* Informational guide */}
-            <div className="bg-emerald-50/70 border-2 border-emerald-200 rounded-xl p-3.5 text-xs text-emerald-900 space-y-1">
+            <div className="bg-emerald-50/70 border-2 border-emerald-200 rounded-xl p-3.5 text-xs text-emerald-900 space-y-1.5">
               <div className="font-bold flex items-center gap-1.5 text-emerald-800">
                 <AlertCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>Diretrizes de Cadastro</span>
+                <span>Diretrizes de Cadastro de Clientes</span>
               </div>
               <p className="text-[11px] leading-relaxed text-emerald-950/80">
-                • Cada passageiro contém obrigatoriamente: <strong>Nome Completo</strong>, <strong>Origem e Destino da viagem</strong> e o <strong>Vendedor da passagem</strong>.
+                • <strong>Apenas o Nome Completo do cliente é exigido</strong> para cadastrar na base.
               </p>
               <p className="text-[11px] leading-relaxed text-emerald-950/80">
-                • Você pode destinar para um motorista imediatamente ou cadastrar na <strong>Lista Geral de Clientes</strong> e alocar a qualquer momento.
+                • <strong>Destino, Origem, Vendedor e Motorista</strong> são <strong>opcionais</strong> no cadastro de clientes.
+              </p>
+              <p className="text-[11px] leading-relaxed text-emerald-950/80">
+                • Na <strong>Lista do Dia</strong>, serão exigidos: <strong>Nome Completo</strong>, <strong>Origem</strong> e <strong>Destino</strong> (vendedor e motorista permanecem opcionais).
               </p>
             </div>
           </div>

@@ -19,9 +19,14 @@ def build_zip():
     # 1. Remove crossorigin attribute from script and link tags for file:/// compatibility
     cleaned_html = html_content.replace(' crossorigin', '').replace('crossorigin', '')
     
-    # 2. Remove registerSW.js tag since Service Workers do not run under file:/// protocol in WebView
+    # 2. Remove registerSW.js tag since Service Workers do not run under file:/// protocol
     cleaned_html = re.sub(r'<script[^>]*register-sw[^>]*>.*?</script>', '', cleaned_html)
     cleaned_html = re.sub(r'<link[^>]*manifest\.webmanifest[^>]*>', '', cleaned_html)
+
+    # Overwrite dist/index.html with the cleaned version so PC, Electron, and offline launchers never fail with CORS
+    with open(index_html_path, 'w', encoding='utf-8') as f:
+        f.write(cleaned_html)
+
 
     # Allowed extensions that WebIntoApp safely accepts
     allowed_extensions = {'.html', '.js', '.css', '.png', '.jpg', '.jpeg', '.svg', '.ico', '.json', '.woff', '.woff2', '.ttf'}

@@ -200,7 +200,9 @@ export const PassengerRow: React.FC<PassengerRowProps> = ({
               className="font-bold text-slate-800 max-w-[100px] truncate hover:underline hover:text-emerald-800 cursor-pointer flex items-center gap-0.5"
               title="Clique para alterar a cidade de origem"
             >
-              <span className="truncate">{passenger.origin}</span>
+              <span className="truncate">
+                {passenger.origin?.trim() || <span className="text-slate-400 font-normal italic">A definir</span>}
+              </span>
               <Edit3 className="w-2.5 h-2.5 text-emerald-600/70 shrink-0" />
             </button>
           )}
@@ -250,7 +252,9 @@ export const PassengerRow: React.FC<PassengerRowProps> = ({
               className="font-bold text-rose-950 max-w-[110px] truncate hover:underline hover:text-rose-700 cursor-pointer flex items-center gap-0.5"
               title="Clique para alterar a cidade de destino"
             >
-              <span className="truncate">{passenger.destination}</span>
+              <span className="truncate">
+                {passenger.destination?.trim() || <span className="text-slate-400 font-normal italic">A definir</span>}
+              </span>
               <Edit3 className="w-2.5 h-2.5 text-rose-500/70 shrink-0" />
             </button>
           )}

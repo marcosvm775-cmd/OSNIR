@@ -27,39 +27,43 @@ if not exist "%~dp0dist\index.html" (
 )
 
 echo [OK] Sistema verificado com sucesso!
-echo Iniciando aplicativo em modo desktop offline...
-echo.
+echo Iniciando servidor local offline protegido contra tela branca...
 
-set "SISTEMA_URL=file:///%~dp0dist/index.html"
+:: Inicia o servidor local offline em segundo plano
+start "" /b powershell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -File "%~dp0servidor.ps1"
+timeout /t 1 /nobreak >nul
+
+set "APP_URL=http://127.0.0.1:38450"
+set "FALLBACK_URL=file:///%~dp0dist/index.html"
 set "CHROME_FLAGS=--allow-file-access-from-files --allow-running-insecure-content --disable-web-security --user-data-dir=\"%temp%\OsnirTurismoBrowserProfile\" --window-size=1280,820"
 
-:: 1. Tenta abrir no Microsoft Edge em modo Aplicativo Nativo
+:: 1. Tenta abrir no Microsoft Edge em modo Janela de Aplicativo
 if exist "%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge.exe" (
-    start "" "%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge.exe" --app="%SISTEMA_URL%" %CHROME_FLAGS%
+    start "" "%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge.exe" --app="%APP_URL%"
     exit /b 0
 )
 
 if exist "%ProgramFiles%\Microsoft\Edge\Application\msedge.exe" (
-    start "" "%ProgramFiles%\Microsoft\Edge\Application\msedge.exe" --app="%SISTEMA_URL%" %CHROME_FLAGS%
+    start "" "%ProgramFiles%\Microsoft\Edge\Application\msedge.exe" --app="%APP_URL%"
     exit /b 0
 )
 
-:: 2. Tenta abrir no Google Chrome em modo Aplicativo Nativo
+:: 2. Tenta abrir no Google Chrome em modo Janela de Aplicativo
 if exist "%ProgramFiles%\Google\Chrome\Application\chrome.exe" (
-    start "" "%ProgramFiles%\Google\Chrome\Application\chrome.exe" --app="%SISTEMA_URL%" %CHROME_FLAGS%
+    start "" "%ProgramFiles%\Google\Chrome\Application\chrome.exe" --app="%APP_URL%"
     exit /b 0
 )
 
 if exist "%ProgramFiles(x86)%\Google\Chrome\Application\chrome.exe" (
-    start "" "%ProgramFiles(x86)%\Google\Chrome\Application\chrome.exe" --app="%SISTEMA_URL%" %CHROME_FLAGS%
+    start "" "%ProgramFiles(x86)%\Google\Chrome\Application\chrome.exe" --app="%APP_URL%"
     exit /b 0
 )
 
 if exist "%LocalAppData%\Google\Chrome\Application\chrome.exe" (
-    start "" "%LocalAppData%\Google\Chrome\Application\chrome.exe" --app="%SISTEMA_URL%" %CHROME_FLAGS%
+    start "" "%LocalAppData%\Google\Chrome\Application\chrome.exe" --app="%APP_URL%"
     exit /b 0
 )
 
-:: 3. Fallback: Abre no navegador padrao
-start "" "%~dp0dist\index.html"
+:: 3. Abre no navegador padrao
+start "" "%APP_URL%"
 exit /b 0

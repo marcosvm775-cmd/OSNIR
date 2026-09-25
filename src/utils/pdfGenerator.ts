@@ -875,10 +875,10 @@ export function generateDailyListPdf(
     const driverName = p.driverId ? driverMap.get(p.driverId) || 'NÃO VINCULADO' : 'A DEFINIR';
     return [
       (index + 1).toString(),
-      p.fullName.toUpperCase(),
-      p.origin.toUpperCase(),
-      p.destination.toUpperCase(),
-      p.seller.toUpperCase(),
+      (p.fullName || '').toUpperCase(),
+      (p.origin?.trim() || 'A DEFINIR').toUpperCase(),
+      (p.destination?.trim() || 'A DEFINIR').toUpperCase(),
+      (p.seller?.trim() || 'BALCÃO').toUpperCase(),
       driverName.toUpperCase(),
       '', // Check-in blank field
     ];

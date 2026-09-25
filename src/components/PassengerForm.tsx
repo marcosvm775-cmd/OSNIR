@@ -98,25 +98,13 @@ export const PassengerForm: React.FC<PassengerFormProps> = ({
       setError('Informe o nome completo do cliente / passageiro.');
       return;
     }
-    if (!trimmedOrigin) {
-      setError('Informe a origem da viagem.');
-      return;
-    }
-    if (!trimmedDestination) {
-      setError('Informe o destino da viagem.');
-      return;
-    }
-    if (!trimmedSeller) {
-      setError('Informe o vendedor da passagem.');
-      return;
-    }
 
     const passengerData: Passenger = {
       id: editingPassenger ? editingPassenger.id : `pass-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       fullName: trimmedName.toUpperCase(),
-      origin: trimmedOrigin.toUpperCase(),
-      destination: trimmedDestination.toUpperCase(),
-      seller: trimmedSeller.toUpperCase(),
+      origin: trimmedOrigin ? trimmedOrigin.toUpperCase() : '',
+      destination: trimmedDestination ? trimmedDestination.toUpperCase() : '',
+      seller: trimmedSeller ? trimmedSeller.toUpperCase() : 'BALCÃO',
       driverId: driverId || '',
       createdAt: editingPassenger ? editingPassenger.createdAt : new Date().toISOString(),
     };
@@ -128,7 +116,7 @@ export const PassengerForm: React.FC<PassengerFormProps> = ({
         ? 'Passageiro atualizado com sucesso!'
         : driverId
         ? 'Passageiro cadastrado e destinado ao motorista!'
-        : 'Passageiro salvo na Lista Geral! Você pode alocar o motorista na lista.'
+        : 'Cliente salvo na base com sucesso! Origem, destino e motorista podem ser definidos a qualquer momento.'
     );
     
     if (!editingPassenger) {
@@ -156,10 +144,12 @@ export const PassengerForm: React.FC<PassengerFormProps> = ({
           </div>
           <div>
             <h2 className="font-bold text-sm sm:text-base leading-tight">
-              {editingPassenger ? 'Editar Passageiro' : 'Cadastro de Cliente Passageiro'}
+              {editingPassenger ? 'Editar Cliente Passageiro' : 'Cadastro de Cliente Passageiro'}
             </h2>
             <p className="text-[11px] text-slate-400">
-              {editingPassenger ? 'Atualize as informações da viagem' : 'Preencha os dados e destine o motorista'}
+              {editingPassenger
+                ? 'Atualize os dados do cliente (Apenas Nome Completo é obrigatório)'
+                : 'Apenas o Nome Completo é exigido • Origem, destino e vendedor são opcionais'}
             </p>
           </div>
         </div>
@@ -168,7 +158,7 @@ export const PassengerForm: React.FC<PassengerFormProps> = ({
           <button
             type="button"
             onClick={onCancelEdit}
-            className="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-md transition"
+            className="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-md transition cursor-pointer"
           >
             Cancelar
           </button>
@@ -221,14 +211,19 @@ export const PassengerForm: React.FC<PassengerFormProps> = ({
               className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-slate-700"
             >
               <User className="w-3.5 h-3.5 text-slate-500" />
-              <span>Nome Completo do Passageiro *</span>
+              <span>Nome Completo do Cliente *</span>
             </label>
-            {!editingPassenger && (
-              <span className="text-[11px] text-slate-400 flex items-center gap-1">
-                <Database className="w-3 h-3 text-emerald-600" />
-                <span>Busca automática na base</span>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full">
+                Único Obrigatório
               </span>
-            )}
+              {!editingPassenger && (
+                <span className="text-[11px] text-slate-400 hidden sm:flex items-center gap-1">
+                  <Database className="w-3 h-3 text-emerald-600" />
+                  <span>Busca na base</span>
+                </span>
+              )}
+            </div>
           </div>
 
           <div className="relative">
@@ -333,65 +328,80 @@ export const PassengerForm: React.FC<PassengerFormProps> = ({
           )}
         </div>
 
-        {/* 2. Campos Separados: Cidade de Origem e Cidade de Destino */}
+        {/* 2. Campos Separados: Cidade de Origem e Cidade de Destino (Opcionais no cadastro de cliente) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="p-3 bg-emerald-50/30 rounded-xl border-2 border-emerald-200">
-            <label
-              htmlFor="passenger-origin-input"
-              className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-950 mb-1.5"
-            >
-              <MapPin className="w-4 h-4 text-emerald-700" />
-              <span>Cidade de Origem *</span>
-            </label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label
+                htmlFor="passenger-origin-input"
+                className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-950"
+              >
+                <MapPin className="w-4 h-4 text-emerald-700" />
+                <span>Cidade de Origem</span>
+              </label>
+              <span className="text-[10px] font-semibold px-2 py-0.5 bg-emerald-100/80 text-emerald-800 rounded-full">
+                Opcional
+              </span>
+            </div>
             <input
               id="passenger-origin-input"
               type="text"
               value={origin}
               onChange={(e) => setOrigin(e.target.value)}
-              placeholder="Ex: São Paulo - SP"
+              placeholder="Ex: São Paulo - SP (Opcional)"
               className="w-full px-3.5 py-2.5 text-sm bg-white border-2 border-slate-300 rounded-xl focus:outline-none focus:border-emerald-600 transition text-slate-900 font-semibold placeholder-slate-400"
             />
           </div>
 
           <div className="p-3 bg-rose-50/30 rounded-xl border-2 border-rose-200">
-            <label
-              htmlFor="passenger-destination-input"
-              className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-rose-950 mb-1.5"
-            >
-              <Flag className="w-4 h-4 text-rose-600" />
-              <span>Cidade de Destino *</span>
-            </label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label
+                htmlFor="passenger-destination-input"
+                className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-rose-950"
+              >
+                <Flag className="w-4 h-4 text-rose-600" />
+                <span>Cidade de Destino</span>
+              </label>
+              <span className="text-[10px] font-semibold px-2 py-0.5 bg-rose-100/80 text-rose-800 rounded-full">
+                Opcional
+              </span>
+            </div>
             <input
               id="passenger-destination-input"
               type="text"
               value={destination}
               onChange={(e) => setDestination(e.target.value)}
-              placeholder="Ex: Belo Horizonte - MG"
+              placeholder="Ex: Belo Horizonte - MG (Opcional)"
               className="w-full px-3.5 py-2.5 text-sm bg-white border-2 border-slate-300 rounded-xl focus:outline-none focus:border-rose-600 transition text-slate-900 font-semibold placeholder-slate-400"
             />
           </div>
         </div>
 
-        {/* 3. Vendedor da Passagem */}
+        {/* 3. Vendedor da Passagem (Opcional) */}
         <div>
-          <label
-            htmlFor="passenger-seller-input"
-            className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5"
-          >
-            <Tag className="w-3.5 h-3.5 text-amber-600" />
-            <span>Vendedor da Passagem *</span>
-          </label>
+          <div className="flex items-center justify-between mb-1.5">
+            <label
+              htmlFor="passenger-seller-input"
+              className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-slate-700"
+            >
+              <Tag className="w-3.5 h-3.5 text-amber-600" />
+              <span>Vendedor da Passagem</span>
+            </label>
+            <span className="text-[10px] font-medium text-slate-500">
+              Opcional (Padrão: BALCÃO)
+            </span>
+          </div>
           <input
             id="passenger-seller-input"
             type="text"
             value={seller}
             onChange={(e) => setSeller(e.target.value)}
-            placeholder="Ex: Maria Vendedora / Guichê Central / Agência 01"
+            placeholder="Ex: Maria Vendedora / Balcão (Opcional)"
             className="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition text-slate-900 placeholder-slate-400"
           />
         </div>
 
-          {/* 4. Destinar para qual motorista ele irá viajar (opcional no cadastro, alocável a qualquer momento na Lista Geral) */}
+        {/* 4. Motorista da viagem (Opcional) */}
         <div className="pt-2 border-t border-slate-100">
           <div className="flex items-center justify-between mb-1.5">
             <label
@@ -399,7 +409,7 @@ export const PassengerForm: React.FC<PassengerFormProps> = ({
               className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-slate-700"
             >
               <Car className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Motorista da Viagem (Alocação)</span>
+              <span>Motorista da Viagem (Opcional)</span>
             </label>
             <button
               id="passenger-form-quick-add-driver-btn"
@@ -414,7 +424,7 @@ export const PassengerForm: React.FC<PassengerFormProps> = ({
 
           {drivers.length === 0 ? (
             <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 flex items-center justify-between">
-              <span>Nenhum motorista cadastrado ainda. O passageiro será salvo na Lista Geral.</span>
+              <span>Nenhum motorista cadastrado ainda. O passageiro será salvo na Lista Geral sem motorista.</span>
               <button
                 type="button"
                 onClick={onOpenDriverModal}
@@ -432,7 +442,7 @@ export const PassengerForm: React.FC<PassengerFormProps> = ({
                 className="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition text-slate-900 font-medium appearance-none cursor-pointer"
               >
                 <option value="">
-                  Deixar sem motorista (Alocar depois pela Lista Geral)
+                  Deixar sem motorista (Opcional - alocar depois quando quiser)
                 </option>
                 {drivers.map((drv) => (
                   <option key={drv.id} value={drv.id}>
