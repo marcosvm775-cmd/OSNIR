@@ -88,11 +88,20 @@ set "FORMATO_SDK=%LOCAL_SDK:\=/%"
 echo sdk.dir=%FORMATO_SDK%> "%RAIZ%\android\local.properties"
 
 echo.
-echo 3. Compilando os arquivos do aplicativo (versao limpa sem gerador de chaves)...
-call npm run build
-if %errorlevel% neq 0 (
-    echo [INFO] Tentando compilacao direta com Vite...
-    call npx vite build
+echo 3. Verificando arquivos compilados do aplicativo...
+if exist "%RAIZ%\dist\index.html" (
+    echo [OK] Versao compilada estavel pronta encontrada em dist\!
+) else (
+    echo [INFO] Compilando arquivos do aplicativo...
+    if not exist "%RAIZ%\node_modules" (
+        echo [INFO] Baixando dependencias necessarias automaticamente...
+        call npm install --no-audit --no-fund
+    )
+    call npm run build
+    if !errorlevel! neq 0 (
+        echo [INFO] Tentando compilacao direta com Vite...
+        call npx --yes vite build
+    )
 )
 
 if not exist "%RAIZ%\android\app\src\main\res\values\colors.xml" (

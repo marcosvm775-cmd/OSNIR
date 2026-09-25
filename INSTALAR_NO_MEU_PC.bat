@@ -20,8 +20,11 @@ if exist "%RAIZ%dist\index.html" (
 ) else if exist "%RAIZ%android\app\src\main\assets\public\index.html" (
     set "PASTA_ORIGEM=%RAIZ%android\app\src\main\assets\public"
 ) else if exist "%RAIZ%index.html" (
-    echo [INFO] Compilando arquivos mais recentes para o computador...
-    call npx vite build
+    echo [INFO] Verificando arquivos para o computador...
+    if not exist "%RAIZ%node_modules" (
+        call npm install --no-audit --no-fund >nul 2>&1
+    )
+    call npx --yes vite build >nul 2>&1
     if exist "%RAIZ%dist\index.html" (
         set "PASTA_ORIGEM=%RAIZ%dist"
     ) else (

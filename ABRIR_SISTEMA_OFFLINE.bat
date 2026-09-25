@@ -14,7 +14,10 @@ echo Verificando arquivos do sistema...
 if not exist "%~dp0dist\index.html" (
     if exist "%~dp0index.html" (
         echo [INFO] Compilando arquivos pela primeira vez... Aguarde alguns instantes...
-        call npx vite build
+        if not exist "%~dp0node_modules" (
+            call npm install --no-audit --no-fund >nul 2>&1
+        )
+        call npx --yes vite build
     )
 )
 

@@ -15,11 +15,20 @@ echo ou para distribuir e vender aos seus clientes!
 echo.
 
 :: 1. Compilar versao mais recente limpa (sem gerador de chaves)
-echo 1. Compilando arquivos do sistema (versao mais recente sem gerador)...
-call npm run build
-if %errorlevel% neq 0 (
-    echo [INFO] Tentando compilacao direta com Vite...
-    call npx vite build
+echo 1. Verificando arquivos compilados do sistema...
+if exist "%RAIZ%\dist\index.html" (
+    echo [OK] Versao compilada estavel pronta encontrada na pasta dist\!
+) else (
+    echo [INFO] Compilando arquivos do sistema...
+    if not exist "%RAIZ%\node_modules" (
+        echo [INFO] Baixando dependencias necessarias automaticamente...
+        call npm install --no-audit --no-fund
+    )
+    call npm run build
+    if !errorlevel! neq 0 (
+        echo [INFO] Tentando compilacao direta com Vite...
+        call npx --yes vite build
+    )
 )
 echo [OK] Arquivos compilados do sistema prontos e atualizados!
 
@@ -38,7 +47,7 @@ echo 3. Empacotando com o Electron Builder e salvando o log...
 echo    Aguarde cerca de 1 a 2 minutos...
 echo.
 
-call npx electron-builder --win nsis > "%RAIZ%\relatorio_erro_electron.txt" 2>&1
+call npx --yes electron-builder --win nsis > "%RAIZ%\relatorio_erro_electron.txt" 2>&1
 
 if %errorlevel% neq 0 (
     color 0C
